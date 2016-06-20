@@ -1,0 +1,33 @@
+{
+  "name": "bindtabs",
+  "version": "1.0.0",
+  "description": "jQuery plugin managing responsive tabs (and their corresponding containers)",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "jquery": "^3.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3",
+    "parallelshell": "^2.0.0"
+  },
+  "scripts": {
+    "build": "parallelshell 'npm run build:js' ' npm run build:css'",
+    "build:js": "tsc --out dist/js/jquery.bindtabs.js src/scripts/jquery.bindtabs.ts --watch",
+    "build:css": "sass --watch src/styles/styles.scss:dist/css/jquery.bindtabs.css --style compressed",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Made-of-Clay/bindtabs.git"
+  },
+  "author": "Made-of-Clay",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Made-of-Clay/bindtabs/issues"
+  },
+  "homepage": "https://github.com/Made-of-Clay/bindtabs#readme"
+}

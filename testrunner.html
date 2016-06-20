@@ -1,0 +1,28 @@
+<html>
+<!-- default test markup from mocha-phantomjs github page: https://github.com/nathanboktae/mocha-phantomjs -->
+<head>
+  <meta charset="utf-8">
+  <!-- encoding must be set for mocha's special characters to render properly -->
+  <link rel="stylesheet" href="node_modules/mocha/mocha.css" />
+  <link rel="stylesheet" href="dist/css/styles.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+  <div id="vc"></div>
+  <script src="node_modules/mocha/mocha.js"></script>
+  <script src="node_modules/chai/chai.js"></script>
+  <script>
+    mocha.ui('bdd');
+    assert = chai.assert;
+    expect = chai.expect;
+  </script>
+  <script src="node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="dist/js/jquery-ui.min.js"></script> <!-- core and widget only -->
+  <script src="dist/js/viewctrls.js"></script>
+
+  <script src="test/jquery.test.js"></script>
+  <script src="test/viewctrls.test.js"></script>
+  
+  <script> mocha.run(); </script>
+</body>
+</html>
