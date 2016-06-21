@@ -4,11 +4,22 @@
   <meta charset="utf-8">
   <!-- encoding must be set for mocha's special characters to render properly -->
   <link rel="stylesheet" href="node_modules/mocha/mocha.css" />
-  <link rel="stylesheet" href="dist/css/styles.css" />
+  <link rel="stylesheet" href="dist/css/jquery.bindtabs.css" />
 </head>
 <body>
   <div id="mocha"></div>
-  <div id="vc"></div>
+  
+  <div id="simple-wrapper" class="test-wrapper">
+    <ul id="simple-tabs" class="test-tabs">
+      <li>Tab 1</li>
+      <li>Tab 2</li>
+    </ul>
+    <div id="simple-containers" class="test-containers">
+      <div>Container 1</div>
+      <div>Container 2</div>
+    </div>
+  </div>
+
   <script src="node_modules/mocha/mocha.js"></script>
   <script src="node_modules/chai/chai.js"></script>
   <script>
@@ -17,11 +28,9 @@
     expect = chai.expect;
   </script>
   <script src="node_modules/jquery/dist/jquery.min.js"></script>
-  <script src="dist/js/jquery-ui.min.js"></script> <!-- core and widget only -->
-  <script src="dist/js/viewctrls.js"></script>
+  <script src="dist/js/jquery.bindtabs.js"></script>
 
-  <script src="test/jquery.test.js"></script>
-  <script src="test/viewctrls.test.js"></script>
+  <script src="test/bindtabs.test.js"></script>
   
   <script> mocha.run(); </script>
 </body>

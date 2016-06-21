@@ -1,7 +1,7 @@
 {
 "version": 3,
-"mappings": "AAEA,KAAM,CCgCJ,gBAAgB,CAPC,GAAW,CAQ5B,gBAAgB,CAAE,iCAA0C,CAC5D,gBAAgB,CAAE,yBAAgD",
-"sources": ["../../src/styles/styles.scss","../../src/styles/bourbon/css3/_linear-gradient.scss"],
+"mappings": "",
+"sources": [],
 "names": [],
 "file": "jquery.bindtabs.css"
 }
