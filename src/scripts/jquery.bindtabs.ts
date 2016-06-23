@@ -18,6 +18,8 @@
         _defaults: Object;
 
         _pluginClass = 'bind_tabs';
+        _tabClass = 'bt_tab';
+        _cntrClass = 'bt_cntr';
 
         constructor(element, options) {
             this.element = $(element);
@@ -37,9 +39,13 @@
         _checkOptions() {
             var opts = this.options;
             // assign tabs & containers
-            if(!isEmpty(opts.tabs) && opts.containers) {
+            if(!isEmpty(opts.tabs) && !isEmpty(opts.containers)) {
                 this._assignRelations('tabs', opts.tabs);
                 this._assignRelations('containers', opts.containers);
+            } else {
+                // check data atts
+                // if even THOSE fail, default to what's in markup
+                this._checkMarkupForElems();
             }
         }
         _assignRelations(prop, elem) {
@@ -54,15 +60,41 @@
                 }
             }
         }
+        _checkMarkupForElems() {
+            var dataAtts = this.element.data();
+            var tabs, containers;
+
+            if(!isEmpty(dataAtts.boundtabs) && !isEmpty(dataAtts.boundcontainers)) {
+                tabs = `.${dataAtts.boundtabs}`;
+                containers = `.${dataAtts.boundcontainers}`;
+            } else {
+                tabs = this.element.children('ul').first();
+                containers = this.element.children('div').first();
+            }
+            this._assignRelations('tabs', tabs);
+            this._assignRelations('containers', containers);
+        }
 
         _addPluginMarkup() {
             this._addPluginClass();
+            this._addPluginElClasses();
         }
         _addPluginClass() {
             var plugin = this;
             $.each([plugin.element, plugin.tabs, plugin.containers], (index, item) => {
                 $(item).addClass(plugin._pluginClass);
             });
+        }
+        _addPluginElClasses() {
+            var plugin = this;
+
+            this.element.addClass('bt_wrapper');
+            this.tabs.addClass('bt_tabs');
+            this.containers.addClass('bt_containers');
+
+            // addClassToEl(this._tabClass, this.tabs);
+            // addClassToEl(this._cntrClass, this.containers);
+            // addClassToEl(this._cntrClass, this.containers.children());
         }
         
         _initListeners() {
@@ -101,6 +133,7 @@
 
     $.fn[pluginName] = function(options: Object) {
         var namespaced: string = `${pluginNs}-${pluginName}`;
+
         return this.each(function() {
             if (!$(this).data(namespaced)) {
                 $(this).data(namespaced, new BindTabs(this, options));

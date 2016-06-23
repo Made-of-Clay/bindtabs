@@ -9,6 +9,8 @@
     var BindTabs = (function () {
         function BindTabs(element, options) {
             this._pluginClass = 'bind_tabs';
+            this._tabClass = 'bt_tab';
+            this._cntrClass = 'bt_cntr';
             this.element = $(element);
             this.options = $.extend({}, defaults, options);
             this._name = pluginName;
@@ -24,9 +26,14 @@
         BindTabs.prototype._checkOptions = function () {
             var opts = this.options;
             // assign tabs & containers
-            if (!isEmpty(opts.tabs) && opts.containers) {
+            if (!isEmpty(opts.tabs) && !isEmpty(opts.containers)) {
                 this._assignRelations('tabs', opts.tabs);
                 this._assignRelations('containers', opts.containers);
+            }
+            else {
+                // check data atts
+                // if even THOSE fail, default to what's in markup
+                this._checkMarkupForElems();
             }
         };
         BindTabs.prototype._assignRelations = function (prop, elem) {
@@ -41,14 +48,38 @@
                 }
             }
         };
+        BindTabs.prototype._checkMarkupForElems = function () {
+            var dataAtts = this.element.data();
+            var tabs, containers;
+            if (!isEmpty(dataAtts.boundtabs) && !isEmpty(dataAtts.boundcontainers)) {
+                tabs = "." + dataAtts.boundtabs;
+                containers = "." + dataAtts.boundcontainers;
+            }
+            else {
+                tabs = this.element.children('ul').first();
+                containers = this.element.children('div').first();
+            }
+            this._assignRelations('tabs', tabs);
+            this._assignRelations('containers', containers);
+        };
         BindTabs.prototype._addPluginMarkup = function () {
             this._addPluginClass();
+            this._addPluginElClasses();
         };
         BindTabs.prototype._addPluginClass = function () {
             var plugin = this;
             $.each([plugin.element, plugin.tabs, plugin.containers], function (index, item) {
                 $(item).addClass(plugin._pluginClass);
             });
+        };
+        BindTabs.prototype._addPluginElClasses = function () {
+            var plugin = this;
+            this.element.addClass('bt_wrapper');
+            this.tabs.addClass('bt_tabs');
+            this.containers.addClass('bt_containers');
+            // addClassToEl(this._tabClass, this.tabs);
+            // addClassToEl(this._cntrClass, this.containers);
+            // addClassToEl(this._cntrClass, this.containers.children());
         };
         BindTabs.prototype._initListeners = function () {
             var plugin = this;
