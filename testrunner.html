@@ -5,16 +5,21 @@
   <!-- encoding must be set for mocha's special characters to render properly -->
   <link rel="stylesheet" href="node_modules/mocha/mocha.css" />
   <link rel="stylesheet" href="dist/css/jquery.bindtabs.css" />
+  <style>
+    #template {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <div id="mocha"></div>
-  
-  <div id="simple-wrapper" class="test-wrapper">
-    <ul id="simple-tabs" class="test-tabs">
+
+  <div id="template" class="wrapper">
+    <ul class="tabs">
       <li>Tab 1</li>
       <li>Tab 2</li>
     </ul>
-    <div id="simple-containers" class="test-containers">
+    <div class="containers">
       <div>Container 1</div>
       <div>Container 2</div>
     </div>
