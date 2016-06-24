@@ -6,11 +6,12 @@
     var defaults = {
         wheels: 4
     };
+    var _pluginClass = 'bind_tabs';
+    var _tabClass = 'bt_tab';
+    var _cntrClass = 'bt_cntr';
     var BindTabs = (function () {
         function BindTabs(element, options) {
-            this._pluginClass = 'bind_tabs';
-            this._tabClass = 'bt_tab';
-            this._cntrClass = 'bt_cntr';
+            this.pairIds = [];
             this.element = $(element);
             this.options = $.extend({}, defaults, options);
             this._name = pluginName;
@@ -18,6 +19,27 @@
             this._create();
             return this;
         }
+        Object.defineProperty(BindTabs.prototype, "_pluginClass", {
+            get: function () {
+                return _pluginClass;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BindTabs.prototype, "_tabClass", {
+            get: function () {
+                return _tabClass;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BindTabs.prototype, "_cntrClass", {
+            get: function () {
+                return _cntrClass;
+            },
+            enumerable: true,
+            configurable: true
+        });
         BindTabs.prototype._create = function () {
             this._checkOptions();
             this._addPluginMarkup();
@@ -65,6 +87,7 @@
         BindTabs.prototype._addPluginMarkup = function () {
             this._addPluginClass();
             this._addPluginElClasses();
+            this._addPairId();
         };
         BindTabs.prototype._addPluginClass = function () {
             var plugin = this;
@@ -77,16 +100,74 @@
             this.element.addClass('bt_wrapper');
             this.tabs.addClass('bt_tabs');
             this.containers.addClass('bt_containers');
-            // addClassToEl(this._tabClass, this.tabs);
-            // addClassToEl(this._cntrClass, this.containers);
-            // addClassToEl(this._cntrClass, this.containers.children());
+            addClassToEach(this._tabClass, this.tabs.children());
+            addClassToEach(this._cntrClass, this.containers.children());
+        };
+        BindTabs.prototype._addPairId = function () {
+            var _this = this;
+            // make this chunk conditional; eventually dynamicTabGen will
+            // create tabs/cntrs and add pairs too
+            this.tabs.children('.bt_tab').each(function (index, tab) {
+                var pairId = _this._makeNewPairId();
+                var $tab = $(tab);
+                var $cntr = _this.containers.children(":eq(" + $tab.index() + ")");
+                $tab.attr('data-pairid', pairId);
+                $cntr.attr('data-pairid', pairId);
+            });
+        };
+        BindTabs.prototype._makeNewPairId = function () {
+            var newId = makeDateId();
+            while ($.inArray(newId, this.pairIds) > -1) {
+                newId = makeDateId();
+            }
+            this.pairIds.push(newId);
+            return newId;
         };
         BindTabs.prototype._initListeners = function () {
             var plugin = this;
             plugin.element;
         };
+        BindTabs.prototype._checkElem = function (elem) {
+            if (!isString(elem) && typeof elem !== 'object') {
+                console.error('You must pass an object or string selector to _checkElem(). This was passed:', elem);
+                return null;
+            }
+            if (elem.length === 0) {
+                console.warn('The element you passed to _checkElem() was empty:', elem);
+                return null;
+            }
+            switch (typeof elem) {
+                case 'string': return this.element.find(elem);
+                case 'object': return (elem instanceof jQuery) ? elem : $(elem);
+            }
+        };
+        BindTabs.prototype.pairedTo = function (elem) {
+            var group;
+            var el = this._checkElem(elem);
+            if (el === null)
+                return;
+            if (el.hasClass('bt_tab')) {
+                group = 'containers';
+            }
+            else if (el.hasClass('bt_cntr')) {
+                group = 'tabs';
+            }
+            else {
+                console.error('Something went wrong; passed element does not have the right class:', el);
+                return null;
+            }
+            return this[group].children("[data-pairid=\"" + el.data('pairid') + "\"]");
+        };
         return BindTabs;
     }());
+    function addClassToEach(className, elems) {
+        $(elems).each(function (index, elem) {
+            $(elem).addClass(className);
+        });
+    }
+    function makeDateId() {
+        return Date.now().toString().substr(-4);
+    }
     // Utilities
     function isJQuery(toCheck) {
         return toCheck instanceof jQuery;
@@ -110,12 +191,20 @@
         }
         return false;
     }
-    $.fn[pluginName] = function (options) {
+    function isString(toCheck) {
+        return typeof toCheck === 'string';
+    }
+    $.fn[pluginName] = function (options, retElems) {
+        if (retElems === void 0) { retElems = false; }
         var namespaced = pluginNs + "-" + pluginName;
-        return this.each(function () {
-            if (!$(this).data(namespaced)) {
-                $(this).data(namespaced, new BindTabs(this, options));
+        var instances = $();
+        this.each(function () {
+            var $this = $(this);
+            if (!$this.data(namespaced)) {
+                $this.data(namespaced, new BindTabs(this, options));
             }
+            instances = instances.add($this.data(namespaced));
         });
+        return retElems ? this : instances;
     };
 })();
