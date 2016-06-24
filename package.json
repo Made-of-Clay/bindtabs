@@ -15,8 +15,8 @@
     "parallelshell": "^2.0.0"
   },
   "scripts": {
-    "build": "parallelshell 'npm run build:js' ' npm run build:css'",
-    "build:js": "tsc --out dist/js/jquery.bindtabs.js src/scripts/jquery.bindtabs.ts --watch",
+    "build": "parallelshell 'npm run build:js' 'npm run build:css'",
+    "build:js": "tsc --out dist/js/jquery.bindtabs.js src/scripts/jquery.bindtabs.ts --watch --target ES5",
     "build:css": "sass --watch src/styles/styles.scss:dist/css/jquery.bindtabs.css --style compressed",
     "test": "mocha"
   },
