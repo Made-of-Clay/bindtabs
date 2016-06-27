@@ -4,15 +4,18 @@
 (function pluginSetupWrapper() {
     var pluginName = 'bindTabs', pluginNs = 'moc';
     var defaults = {
-        wheels: 4
+        closable: false
     };
-    var _pluginClass = 'bind_tabs';
-    var _tabClass = 'bt_tab';
-    var _cntrClass = 'bt_cntr';
-    var _showClass = 'is-showing';
+    var pluginClass = 'bind_tabs';
+    var tabClass = 'bt_tab';
+    var cntrClass = 'bt_cntr';
+    var showClass = 'is-showing';
+    var tabNameWrapClass = 'tabNameWrap';
+    var closableClass = 'bt_closeTab';
     var BindTabs = (function () {
         function BindTabs(element, options) {
             this.pairIds = [];
+            this.tabNameWrapMarkup = "<span class=\"" + tabNameWrapClass + "\">";
             this.element = $(element);
             this.options = $.extend({}, defaults, options);
             this._name = pluginName;
@@ -20,34 +23,6 @@
             this._create();
             return this;
         }
-        Object.defineProperty(BindTabs.prototype, "_pluginClass", {
-            get: function () {
-                return _pluginClass;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(BindTabs.prototype, "_tabClass", {
-            get: function () {
-                return _tabClass;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(BindTabs.prototype, "_cntrClass", {
-            get: function () {
-                return _cntrClass;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(BindTabs.prototype, "_showClass", {
-            get: function () {
-                return _showClass;
-            },
-            enumerable: true,
-            configurable: true
-        });
         BindTabs.prototype._create = function () {
             this._checkOptions();
             this._addPluginMarkup();
@@ -55,14 +30,11 @@
         };
         BindTabs.prototype._checkOptions = function () {
             var opts = this.options;
-            // assign tabs & containers
             if (!isEmpty(opts.tabs) && !isEmpty(opts.containers)) {
                 this._assignRelations('tabs', opts.tabs);
                 this._assignRelations('containers', opts.containers);
             }
             else {
-                // check data atts
-                // if even THOSE fail, default to what's in markup
                 this._checkMarkupForElems();
             }
         };
@@ -72,7 +44,7 @@
                 plugin[prop] = elem;
             }
             else {
-                var findTabs = plugin.element.find(elem).not("." + plugin._pluginClass);
+                var findTabs = plugin.element.find(elem).not("." + pluginClass);
                 if (findTabs.length > 0) {
                     plugin[prop] = findTabs;
                 }
@@ -95,13 +67,14 @@
         BindTabs.prototype._addPluginMarkup = function () {
             this._addPluginClass();
             this._addPluginElClasses();
+            this._addSpTabMarkup();
             this._addPairId();
             this._showStartingTab();
         };
         BindTabs.prototype._addPluginClass = function () {
             var plugin = this;
             $.each([plugin.element, plugin.tabs, plugin.containers], function (index, item) {
-                $(item).addClass(plugin._pluginClass);
+                $(item).addClass(pluginClass);
             });
         };
         BindTabs.prototype._addPluginElClasses = function () {
@@ -109,8 +82,19 @@
             this.element.addClass('bt_wrapper');
             this.tabs.addClass('bt_tabs');
             this.containers.addClass('bt_containers');
-            addClassToEach(this._tabClass, this.tabs.children());
-            addClassToEach(this._cntrClass, this.containers.children());
+            addClassToEach(tabClass, this.tabs.children());
+            addClassToEach(cntrClass, this.containers.children());
+        };
+        BindTabs.prototype._addSpTabMarkup = function () {
+            var closeMarkup = $('<span>', {
+                class: closableClass,
+                html: '&times;'
+            });
+            var tabs = this.tabs.children('.bt_tab');
+            tabs.wrapInner(this.tabNameWrapMarkup);
+            if (this.options.closable) {
+                tabs.append((closeMarkup));
+            }
         };
         BindTabs.prototype._addPairId = function () {
             var _this = this;
@@ -141,7 +125,7 @@
             plugin.element
                 .on('click', '.bt_tab', showClkdPair);
             function showClkdPair(event) {
-                plugin.show(event.target);
+                plugin.show(event.currentTarget);
             }
         };
         BindTabs.prototype._checkElem = function (elem) {
@@ -178,7 +162,7 @@
             return tab.hasClass('is-disabled');
         };
         BindTabs.prototype._showing = function (tab) {
-            var showSelector = '.' + this._showClass;
+            var showSelector = '.' + showClass;
             var showingTab = this.tabs.children(showSelector);
             if (showingTab.length === 0)
                 return false;
@@ -187,7 +171,7 @@
         BindTabs.prototype._removeShowClass = function (tab, container) {
             if (tab === void 0) { tab = $(); }
             if (container === void 0) { container = $(); }
-            var showSelector = '.' + this._showClass;
+            var showSelector = '.' + showClass;
             var elements = $();
             if (isEmpty(tab.length)) {
                 tab = tab.add(this.tabs.children('.is-showing'));
@@ -197,11 +181,11 @@
                 container = this.containers.children('.is-showing');
             }
             elements = elements.add(container);
-            elements.removeClass(this._showClass).trigger('blur:bindtabs');
+            elements.removeClass(showClass).trigger('blur:bindtabs');
         };
         BindTabs.prototype._addShowClass = function (tab, container) {
-            this.element.find(tab).addClass(this._showClass);
-            this.element.find(container).addClass(this._showClass);
+            this.element.find(tab).addClass(showClass);
+            this.element.find(container).addClass(showClass);
         };
         BindTabs.prototype._trigger = function (event, collection) {
             var evt = event + ":bindtabs";

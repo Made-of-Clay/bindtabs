@@ -4,19 +4,22 @@
     var pluginName: string = 'bindTabs',
         pluginNs: string = 'moc';
     var defaults = {
-            wheels: 4
-        };
+        closable: false
+    };
 
-    const _pluginClass = 'bind_tabs';
-    const _tabClass = 'bt_tab';
-    const _cntrClass = 'bt_cntr';
-    const _showClass = 'is-showing';
+    const pluginClass = 'bind_tabs';
+    const tabClass = 'bt_tab';
+    const cntrClass = 'bt_cntr';
+    const showClass = 'is-showing';
+    const tabNameWrapClass = 'tabNameWrap';
+    const closableClass = 'bt_closeTab';
 
     class BindTabs {
         element: JQuery;
         tabs: JQuery;
         containers: JQuery;
         pairIds: string[] = [];
+        tabNameWrapMarkup: string = `<span class="${tabNameWrapClass}">`;
 
         options: BtOptions;
 
@@ -32,19 +35,6 @@
             return this;
         }
 
-        get _pluginClass() {
-            return _pluginClass;
-        }
-        get _tabClass() {
-            return _tabClass;
-        }
-        get _cntrClass() {
-            return _cntrClass;
-        }
-        get _showClass() {
-            return _showClass;
-        }
-
         _create() {
             this._checkOptions();
             this._addPluginMarkup();
@@ -53,13 +43,11 @@
 
         _checkOptions() {
             var opts = this.options;
-            // assign tabs & containers
+
             if(!isEmpty(opts.tabs) && !isEmpty(opts.containers)) {
                 this._assignRelations('tabs', opts.tabs);
                 this._assignRelations('containers', opts.containers);
             } else {
-                // check data atts
-                // if even THOSE fail, default to what's in markup
                 this._checkMarkupForElems();
             }
         }
@@ -69,7 +57,7 @@
             if(isJQuery(elem) && elem.length > 0) {
                 plugin[prop] = elem;
             } else {
-                var findTabs = plugin.element.find(elem).not(`.${plugin._pluginClass}`);
+                var findTabs = plugin.element.find(elem).not(`.${pluginClass}`);
                 if(findTabs.length > 0) {
                     plugin[prop] = findTabs;
                 }
@@ -93,13 +81,14 @@
         _addPluginMarkup() {
             this._addPluginClass();
             this._addPluginElClasses();
+            this._addSpTabMarkup();
             this._addPairId();
             this._showStartingTab();
         }
         _addPluginClass() {
             var plugin = this;
             $.each([plugin.element, plugin.tabs, plugin.containers], (index, item) => {
-                $(item).addClass(plugin._pluginClass);
+                $(item).addClass(pluginClass);
             });
         }
         _addPluginElClasses() {
@@ -109,8 +98,20 @@
             this.tabs.addClass('bt_tabs');
             this.containers.addClass('bt_containers');
 
-            addClassToEach(this._tabClass, this.tabs.children());
-            addClassToEach(this._cntrClass, this.containers.children());
+            addClassToEach(tabClass, this.tabs.children());
+            addClassToEach(cntrClass, this.containers.children());
+        }
+        _addSpTabMarkup() {
+            var closeMarkup = $('<span>', {
+                class: closableClass,
+                html: '&times;'
+            });
+            var tabs = this.tabs.children('.bt_tab');
+            tabs.wrapInner(this.tabNameWrapMarkup);
+
+            if(this.options.closable) {
+                tabs.append((closeMarkup));
+            }
         }
         _addPairId() {
             // make this chunk conditional; eventually dynamicTabGen will
@@ -142,7 +143,7 @@
             ;
 
             function showClkdPair(event) {
-                plugin.show(event.target);
+                plugin.show(event.currentTarget);
             }
         }
 
@@ -185,7 +186,7 @@
         }
 
         _showing(tab:JQuery) {
-            var showSelector = '.'+this._showClass;
+            var showSelector = '.'+showClass;
             var showingTab = this.tabs.children(showSelector);
 
             if(showingTab.length === 0) return false;
@@ -193,7 +194,7 @@
         }
 
         _removeShowClass(tab:JQuery = $(), container:JQuery = $()) {
-            var showSelector = '.'+this._showClass;
+            var showSelector = '.'+showClass;
             var elements = $();
 
             if(isEmpty(tab.length)) {
@@ -206,12 +207,12 @@
             }
             elements = elements.add(container);
 
-            elements.removeClass(this._showClass).trigger('blur:bindtabs');
+            elements.removeClass(showClass).trigger('blur:bindtabs');
         }
 
         _addShowClass(tab:JQuery, container:JQuery) {
-            this.element.find(tab).addClass(this._showClass);
-            this.element.find(container).addClass(this._showClass);
+            this.element.find(tab).addClass(showClass);
+            this.element.find(container).addClass(showClass);
         }
 
         _trigger(event:string, collection:JQuery[]) {

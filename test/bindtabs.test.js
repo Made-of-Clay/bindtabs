@@ -116,12 +116,37 @@ describe('bindTabs', function () {
             expect(showingCntr).to.be.ok;
             onlyPairedCntrShows.should.be.true;
         });
+        it('should add a text wrapper around the tab name', function () {
+            var bt = clone();
+
+            bto = bt.bindTabs();
+            bto = bto[0];
+
+            bto.tabs.children().each(function (index, elem) {
+                $(elem).children('.tabNameWrap').length.should.be.above(0);
+            });
+        });
     });
+
+    describe('init options', function () {
+        it('should add a close icon if the option is set to true', function () {
+            var bt = clone();
+noRemove(bt);
+            bto = bt.bindTabs({
+                closable: true
+            });
+            bto = bto[0];
+
+            bto.tabs.children().each(function (index, elem) {
+                $(elem).children('.bt_closeTab').length.should.be.above(0);
+            });
+        });
+    })
 
     describe('DOM events', function () {
         it('should show related container when tab is clicked', function () {
             var bt = clone();
-noRemove(bt);
+
             bto = bt.bindTabs();
             bto = bto[0];
             var containers = bto.containers.children();
