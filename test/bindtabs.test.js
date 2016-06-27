@@ -105,21 +105,13 @@ describe('bindTabs', function () {
         });
         it('should hide all containers except for what "is-showing"', function () {
             var bt = clone();
-noRemove(bt);
+
             bto = bt.bindTabs();
             bto = bto[0];
             var showingTab = bto.tabs.children('.'+showClass);
             var showingCntr = bto.pairedTo(showingTab);
             var onlyPairedCntrShows = checkIfCntrsHidden(bto.containers.children(), showingCntr);
 
-            // fetch tab that "is showing"
-            // get paired container
-            // make sure showing is showing && others are not
-            //////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////
-            /// showingTab is empty - no showClass added yet
-            //////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////
             expect(showingTab).to.be.ok;
             expect(showingCntr).to.be.ok;
             onlyPairedCntrShows.should.be.true;
