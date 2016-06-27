@@ -119,17 +119,19 @@ describe('bindTabs', function () {
     });
 
     describe('DOM events', function () {
-        it('should show related container when tab is clicked'/*, function () {
+        it('should show related container when tab is clicked', function () {
             var bt = clone();
-
+noRemove(bt);
             bto = bt.bindTabs();
             bto = bto[0];
-            bto.tabs.children().last().click();
-            var lastCntr = bto.containers.children().last();
+            var containers = bto.containers.children();
+            var firstCntr = containers.first();
+            var lastCntr = containers.last();
+            bto.pairedTo(lastCntr).click();
 
             lastCntr.hasClass('is-showing').should.be.true;
-            lastCntr.is(':visible').should.be.true;
-        }*/);
+            firstCntr.hasClass('is-showing').should.be.false;
+        });
         // it('');
         // it('');
         // it('');

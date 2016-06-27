@@ -1,7 +1,7 @@
 {
 "version": 3,
-"mappings": "",
-"sources": [],
+"mappings": "AAAA,QAAS,CACL,UAAU,CAAE,IAAI,CAChB,MAAM,CAAE,CAAC,CACT,OAAO,CAAE,CAAC,CCCd,QAAS,CACL,OAAO,CAAE,IAAI,CAEb,mBAAgB,CACZ,OAAO,CAAE,KAAK",
+"sources": ["../../src/styles/modules/_tabs.scss","../../src/styles/modules/_containers.scss"],
 "names": [],
 "file": "jquery.bindtabs.css"
 }

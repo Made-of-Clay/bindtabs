@@ -138,7 +138,12 @@
         _initListeners() {
             var plugin = this;
             plugin.element
+                .on('click', '.bt_tab', showClkdPair)
             ;
+
+            function showClkdPair(event) {
+                plugin.show(event.target);
+            }
         }
 
         _checkElem(elem) {
@@ -184,20 +189,24 @@
             var showingTab = this.tabs.children(showSelector);
 
             if(showingTab.length === 0) return false;
-            return (tab.attr('id') === showingTab.attr('id'));
+            return (tab.data('pairid') === showingTab.data('pairid'));
         }
 
-        _removeShowClass(tab:JQuery, container:JQuery) {
+        _removeShowClass(tab:JQuery = $(), container:JQuery = $()) {
             var showSelector = '.'+this._showClass;
-            var plugin = this;
+            var elements = $();
 
-            $.each([tab, container], (index, elem) => {
-                let collection = ($(elem).hasClass('bt_tab')) ? 'tabs' : 'containers';
-                // plugin[collection].children(showSelector)
-                plugin.element.find(elem)
-                    .removeClass(plugin._showClass)
-                    .trigger('blur:bindtabs');
-            });
+            if(isEmpty(tab.length)) {
+                tab = tab.add(this.tabs.children('.is-showing'));
+            }
+            elements = elements.add(tab);
+
+            if(isEmpty(container.length)) {
+                container = this.containers.children('.is-showing');
+            }
+            elements = elements.add(container);
+
+            elements.removeClass(this._showClass).trigger('blur:bindtabs');
         }
 
         _addShowClass(tab:JQuery, container:JQuery) {
@@ -229,7 +238,7 @@
             return this[group].children(`[data-pairid="${el.data('pairid')}"]`);
         }
 
-        show(srcElem: JQuery | string) {
+        show(srcElem: JQuery | string | HTMLElement) {
             var tab: JQuery, cntr: JQuery;
             var elem = this._checkElem(srcElem);
             if(elem === null) return;
@@ -238,14 +247,18 @@
             tab = elems.tab;
             cntr = elems.cntr;
 
-            // tab = elems.tab;
-            if(this._disabled(tab)) return;
-            if(this._showing(tab)) return;
+            if(this._disabled(tab)) {
+                return;
+            }
+            if(this._showing(tab)) {
+                return;
+            }
 
-            this._removeShowClass(tab, cntr);
+            this._removeShowClass();
             this._addShowClass(tab, cntr);
             // show current tablist item
             this._trigger('show', [tab, cntr]);
+            tab.trigger('show:bindtabs');
 
             return tab;
         }
