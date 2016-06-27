@@ -1,0 +1,11 @@
+.bt_cntrs {
+    //
+}
+
+.bt_cntr {
+    display: none;
+
+    &.#{$showClass} {
+        display: block;
+    }
+}
