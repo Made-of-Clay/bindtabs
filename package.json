@@ -7,7 +7,8 @@
     "test": "test"
   },
   "dependencies": {
-    "jquery": "^3.0.0"
+    "jquery": "^3.0.0",
+    "modernizr": "^3.3.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -18,6 +19,7 @@
     "build": "parallelshell 'npm run build:js' 'npm run build:css'",
     "build:js": "tsc --out dist/js/jquery.bindtabs.js src/scripts/jquery.bindtabs.ts --watch --target ES5",
     "build:css": "sass --watch src/styles/styles.scss:dist/css/jquery.bindtabs.css --style compressed",
+    "build:modernizr": "cd ./node_modules/modernizr && ./bin/modernizr -c ./../../modernizr-config-custom.json && cd ../..",
     "test": "mocha"
   },
   "repository": {
