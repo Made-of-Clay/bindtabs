@@ -105,7 +105,7 @@ describe('bindTabs', function () {
         });
         it('should hide all containers except for what "is-showing"', function () {
             var bt = clone();
-
+noRemove(bt);
             bto = bt.bindTabs();
             bto = bto[0];
             var showingTab = bto.tabs.children('.'+showClass);
@@ -166,7 +166,7 @@ function checkIfCntrsHidden(containers, showingCntr) {
     var allButShowingAreHidden = true;
     $(containers).each(function(index, cntr) {
         // var $cntr = $(cntr);
-        if(isShowing(cntr) && cntr.id !== showingCntr.attr('id')) {
+        if(isShowing(cntr) && $(cntr).data('pairid') !== showingCntr.data('pairid')) {
             allButShowingAreHidden = false;
         }
     });

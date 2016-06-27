@@ -10,6 +10,7 @@
     const _pluginClass = 'bind_tabs';
     const _tabClass = 'bt_tab';
     const _cntrClass = 'bt_cntr';
+    const _showClass = 'is-showing';
 
     class BindTabs {
         element: JQuery;
@@ -39,6 +40,9 @@
         }
         get _cntrClass() {
             return _cntrClass;
+        }
+        get _showClass() {
+            return _showClass;
         }
 
         _create() {
@@ -90,6 +94,7 @@
             this._addPluginClass();
             this._addPluginElClasses();
             this._addPairId();
+            this._showStartingTab();
         }
         _addPluginClass() {
             var plugin = this;
@@ -126,6 +131,9 @@
             this.pairIds.push(newId);
             return newId;
         }
+        _showStartingTab(showFirstInSet: boolean = false) {
+            this.show(this.tabs.children().first());
+        }
 
         _initListeners() {
             var plugin = this;
@@ -140,6 +148,7 @@
             }
             if(elem.length === 0) {
                 console.warn('The element you passed to _checkElem() was empty:', elem);
+                console.trace('Empty _checkElem()');
                 return null;
             }
 
@@ -147,6 +156,60 @@
                 case 'string': return this.element.find(elem);
                 case 'object': return (elem instanceof jQuery) ? elem : $(elem);
             }
+        }
+
+
+        _assignElems(tab, cntr, elem:JQuery) {
+            var elements: { tab:any, cntr:any } = {
+                tab: null,
+                cntr: null
+            };
+            if(elem.hasClass('bt_cntr')) {
+                elements.cntr = elem;
+                elements.tab = this.pairedTo(elem);
+            } else {
+                elements.tab = elem;
+                elements.cntr = this.pairedTo(elem);
+            }
+
+            return elements;
+        }
+
+        _disabled(tab: JQuery) {
+            return tab.hasClass('is-disabled');
+        }
+
+        _showing(tab:JQuery) {
+            var showSelector = '.'+this._showClass;
+            var showingTab = this.tabs.children(showSelector);
+
+            if(showingTab.length === 0) return false;
+            return (tab.attr('id') === showingTab.attr('id'));
+        }
+
+        _removeShowClass(tab:JQuery, container:JQuery) {
+            var showSelector = '.'+this._showClass;
+            var plugin = this;
+
+            $.each([tab, container], (index, elem) => {
+                let collection = ($(elem).hasClass('bt_tab')) ? 'tabs' : 'containers';
+                // plugin[collection].children(showSelector)
+                plugin.element.find(elem)
+                    .removeClass(plugin._showClass)
+                    .trigger('blur:bindtabs');
+            });
+        }
+
+        _addShowClass(tab:JQuery, container:JQuery) {
+            this.element.find(tab).addClass(this._showClass);
+            this.element.find(container).addClass(this._showClass);
+        }
+
+        _trigger(event:string, collection:JQuery[]) {
+            var evt:string = `${event}:bindtabs`;
+            $.each(collection, (index, elem) => {
+                $(elem).trigger(evt);
+            });
         }
 
         pairedTo(elem: JQuery | HTMLElement) {
@@ -162,7 +225,29 @@
                 console.error('Something went wrong; passed element does not have the right class:', el);
                 return null;
             }
+
             return this[group].children(`[data-pairid="${el.data('pairid')}"]`);
+        }
+
+        show(srcElem: JQuery | string) {
+            var tab: JQuery, cntr: JQuery;
+            var elem = this._checkElem(srcElem);
+            if(elem === null) return;
+
+            var elems = this._assignElems(tab, cntr, elem);
+            tab = elems.tab;
+            cntr = elems.cntr;
+
+            // tab = elems.tab;
+            if(this._disabled(tab)) return;
+            if(this._showing(tab)) return;
+
+            this._removeShowClass(tab, cntr);
+            this._addShowClass(tab, cntr);
+            // show current tablist item
+            this._trigger('show', [tab, cntr]);
+
+            return tab;
         }
     }
 

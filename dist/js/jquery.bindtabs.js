@@ -9,6 +9,7 @@
     var _pluginClass = 'bind_tabs';
     var _tabClass = 'bt_tab';
     var _cntrClass = 'bt_cntr';
+    var _showClass = 'is-showing';
     var BindTabs = (function () {
         function BindTabs(element, options) {
             this.pairIds = [];
@@ -36,6 +37,13 @@
         Object.defineProperty(BindTabs.prototype, "_cntrClass", {
             get: function () {
                 return _cntrClass;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BindTabs.prototype, "_showClass", {
+            get: function () {
+                return _showClass;
             },
             enumerable: true,
             configurable: true
@@ -88,6 +96,7 @@
             this._addPluginClass();
             this._addPluginElClasses();
             this._addPairId();
+            this._showStartingTab();
         };
         BindTabs.prototype._addPluginClass = function () {
             var plugin = this;
@@ -123,6 +132,10 @@
             this.pairIds.push(newId);
             return newId;
         };
+        BindTabs.prototype._showStartingTab = function (showFirstInSet) {
+            if (showFirstInSet === void 0) { showFirstInSet = false; }
+            this.show(this.tabs.children().first());
+        };
         BindTabs.prototype._initListeners = function () {
             var plugin = this;
             plugin.element;
@@ -134,12 +147,59 @@
             }
             if (elem.length === 0) {
                 console.warn('The element you passed to _checkElem() was empty:', elem);
+                console.trace('Empty _checkElem()');
                 return null;
             }
             switch (typeof elem) {
                 case 'string': return this.element.find(elem);
                 case 'object': return (elem instanceof jQuery) ? elem : $(elem);
             }
+        };
+        BindTabs.prototype._assignElems = function (tab, cntr, elem) {
+            var elements = {
+                tab: null,
+                cntr: null
+            };
+            if (elem.hasClass('bt_cntr')) {
+                elements.cntr = elem;
+                elements.tab = this.pairedTo(elem);
+            }
+            else {
+                elements.tab = elem;
+                elements.cntr = this.pairedTo(elem);
+            }
+            return elements;
+        };
+        BindTabs.prototype._disabled = function (tab) {
+            return tab.hasClass('is-disabled');
+        };
+        BindTabs.prototype._showing = function (tab) {
+            var showSelector = '.' + this._showClass;
+            var showingTab = this.tabs.children(showSelector);
+            if (showingTab.length === 0)
+                return false;
+            return (tab.attr('id') === showingTab.attr('id'));
+        };
+        BindTabs.prototype._removeShowClass = function (tab, container) {
+            var showSelector = '.' + this._showClass;
+            var plugin = this;
+            $.each([tab, container], function (index, elem) {
+                var collection = ($(elem).hasClass('bt_tab')) ? 'tabs' : 'containers';
+                // plugin[collection].children(showSelector)
+                plugin.element.find(elem)
+                    .removeClass(plugin._showClass)
+                    .trigger('blur:bindtabs');
+            });
+        };
+        BindTabs.prototype._addShowClass = function (tab, container) {
+            this.element.find(tab).addClass(this._showClass);
+            this.element.find(container).addClass(this._showClass);
+        };
+        BindTabs.prototype._trigger = function (event, collection) {
+            var evt = event + ":bindtabs";
+            $.each(collection, function (index, elem) {
+                $(elem).trigger(evt);
+            });
         };
         BindTabs.prototype.pairedTo = function (elem) {
             var group;
@@ -157,6 +217,25 @@
                 return null;
             }
             return this[group].children("[data-pairid=\"" + el.data('pairid') + "\"]");
+        };
+        BindTabs.prototype.show = function (srcElem) {
+            var tab, cntr;
+            var elem = this._checkElem(srcElem);
+            if (elem === null)
+                return;
+            var elems = this._assignElems(tab, cntr, elem);
+            tab = elems.tab;
+            cntr = elems.cntr;
+            // tab = elems.tab;
+            if (this._disabled(tab))
+                return;
+            if (this._showing(tab))
+                return;
+            this._removeShowClass(tab, cntr);
+            this._addShowClass(tab, cntr);
+            // show current tablist item
+            this._trigger('show', [tab, cntr]);
+            return tab;
         };
         return BindTabs;
     }());
