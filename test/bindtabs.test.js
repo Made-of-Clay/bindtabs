@@ -131,7 +131,7 @@ describe('bindTabs', function () {
     describe('init options', function () {
         it('should add a close icon if the option is set to true', function () {
             var bt = clone();
-noRemove(bt);
+
             bto = bt.bindTabs({
                 closable: true
             });
@@ -141,7 +141,7 @@ noRemove(bt);
                 $(elem).children('.bt_closeTab').length.should.be.above(0);
             });
         });
-    })
+    });
 
     describe('DOM events', function () {
         it('should show related container when tab is clicked', function () {
@@ -157,11 +157,93 @@ noRemove(bt);
             lastCntr.hasClass('is-showing').should.be.true;
             firstCntr.hasClass('is-showing').should.be.false;
         });
+        it('should close the tab/cntr pair when the close icon is clicked', function () {
+            var bt = clone();
+            bto = bt.bindTabs({
+                closable: true
+            });
+            bto = bto[0];
+            var tabs = bto.tabs.children('.bt_tab');
+            var cntrs = bto.containers.children('.bt_cntr');
+            var tabCount = tabs.length;
+            var cntrCount = cntrs.length;
+
+            tabs.first().find('.bt_closeTab').click();
+
+            bto.getTabs().length.should.equal(tabCount-1);
+            bto.getContainers().length.should.equal(cntrCount-1);
+        });
         // it('');
         // it('');
         // it('');
         // it('');
-        // it('');
+    });
+
+    describe('custom published events', function () {
+        it('should fire ready events when bindtabs is ready', function (done) {
+            var bt = clone();
+            bt.on('ready:bindtabs', function(event) {
+                expect(event.type).to.equal('ready:bindtabs');
+                done();
+            });
+            bt.bindTabs();
+        });
+        it('should fire show events when showing tabs', function () {
+            var bt = clone();
+
+            bto = bt.bindTabs();
+            bto = bto[0];
+            bto.getTabs().first().on('show:bindtabs', function () {
+                expect(event.type).to.equal('show:bindtabs');
+            })
+
+            lastCntr.hasClass('is-showing').should.be.true;
+            firstCntr.hasClass('is-showing').should.be.false;
+        });
+        it('should fire close(d) events when closing tabs');
+    });
+
+    describe('API', function () {
+        it('should expose show()', function () {
+            var bt = clone();
+
+            bto = bt.bindTabs();
+            bto = bto[0];
+            var lastTab = bto.tabs.children('.bt_tab').last();
+            bto.show(lastTab);
+
+            expect(lastTab.hasClass(showClass)).to.be.true;
+        });
+        it('should expose getCurrent()', function () {
+            var bt = clone();
+
+            bto = bt.bindTabs();
+            bto = bto[0];
+            var firstTab = bto.tabs.children('').first();
+            var curTab = bto.getCurrent('tab');
+
+            expect(firstTab.data('pairid')).to.equal(curTab.data('pairid'));
+        });
+        it('should expose an alias to getCurrent() called getCurTab()', function () {
+            var bt = clone();
+
+            bto = bt.bindTabs();
+            bto = bto[0];
+            var firstTab = bto.tabs.children('').first();
+            var curTab = bto.getCurTab('tab');
+
+            expect(firstTab.data('pairid')).to.equal(curTab.data('pairid'));
+        });
+        it('should expose an alias to getCurrent() called getCurCntr()', function () {
+            var bt = clone();
+
+            bto = bt.bindTabs();
+            bto = bto[0];
+            var firstCntr = bto.containers.children('').first();
+            var curCntr = bto.getCurCntr('container');
+
+            expect(firstCntr.data('pairid')).to.equal(curCntr.data('pairid'));
+        });
     });
 });
 

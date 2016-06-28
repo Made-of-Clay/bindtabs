@@ -1,11 +1,23 @@
 /// <reference path="./jquery.d.ts" />
 /// <reference path="./bindtabs-options.d.ts" />
+
+/*
+    Custom Events:
+    - shown
+    - closed
+ */
 ;(function pluginSetupWrapper() {
     var pluginName: string = 'bindTabs',
         pluginNs: string = 'moc';
     var defaults = {
         closable: false
     };
+
+    /*
+    possible additions:
+    - callbacks before major events (show, close, load, ...)
+        -> these are in contrast to events fired after actions finish (show, closed, loaded, ...)
+     */
 
     const pluginClass = 'bind_tabs';
     const tabClass = 'bt_tab';
@@ -39,6 +51,8 @@
             this._checkOptions();
             this._addPluginMarkup();
             this._initListeners();
+
+            this.element.trigger('ready:bindtabs');
         }
 
         _checkOptions() {
@@ -140,10 +154,16 @@
             var plugin = this;
             plugin.element
                 .on('click', '.bt_tab', showClkdPair)
+                .on('click', '.bt_closeTab', closeClkdPair)
             ;
 
             function showClkdPair(event) {
                 plugin.show(event.currentTarget);
+            }
+            function closeClkdPair(event) {
+                var tab = $(this).closest('.bt_tab');
+                plugin.close(tab);
+                event.stopPropagation();
             }
         }
 
@@ -165,15 +185,19 @@
         }
 
 
-        _assignElems(tab, cntr, elem:JQuery) {
+        _assignElems(elem:JQuery) {
             var elements: { tab:any, cntr:any } = {
                 tab: null,
                 cntr: null
             };
-            if(elem.hasClass('bt_cntr')) {
-                elements.cntr = elem;
+
+            if(isEmpty(elem)) {
+                elements.tab = this.getCurTab();
+                elements.cntr = this.getCurCntr();
+            } else if(elem.hasClass('bt_cntr')) {
                 elements.tab = this.pairedTo(elem);
-            } else {
+                elements.cntr = elem;
+            } else if(elem.hasClass('bt_tab')) {
                 elements.tab = elem;
                 elements.cntr = this.pairedTo(elem);
             }
@@ -239,12 +263,46 @@
             return this[group].children(`[data-pairid="${el.data('pairid')}"]`);
         }
 
+        getCurrent(toGet?: string) {
+            var toReturn: JQuery = $();
+
+            switch(toGet) {
+                case 'tab':
+                    toReturn = this.tabs.children('.'+showClass);
+                    break;
+
+                case 'container':
+                case 'cntr':
+                    toReturn = this.containers.children('.'+showClass);
+                    break;
+
+                default:
+                    toReturn = toReturn.add(this.tabs.children('.'+showClass));
+                    toReturn = toReturn.add(this.containers.children('.'+showClass));
+                    break;
+            }
+            return toReturn;
+        }
+        getCurTab() {
+            return this.getCurrent('tab');
+        }
+        getCurCntr() {
+            return this.getCurrent('container');
+        }
+
+        getTabs() {
+            return this.tabs.children('.bt_tab');
+        }
+        getContainers() {
+            return this.containers.children('.bt_cntr');
+        }
+
         show(srcElem: JQuery | string | HTMLElement) {
             var tab: JQuery, cntr: JQuery;
             var elem = this._checkElem(srcElem);
             if(elem === null) return;
 
-            var elems = this._assignElems(tab, cntr, elem);
+            var elems = this._assignElems(elem);
             tab = elems.tab;
             cntr = elems.cntr;
 
@@ -260,8 +318,31 @@
             // show current tablist item
             this._trigger('show', [tab, cntr]);
             tab.trigger('show:bindtabs');
-
             return tab;
+        }
+
+        close(srcElem?: JQuery | HTMLElement) {
+            var removeClass: string = 'TOBE_REMOVED';
+            var tab: JQuery;
+            var cntr: JQuery;
+            var elem: JQuery = this._checkElem(srcElem);
+            var elements = this._assignElems(elem);
+            tab = elements.tab;
+            cntr = elements.cntr;
+            var $elems = $().add(tab).add(cntr);
+            var prevTab = tab.prev();
+
+            // check closable
+            // check event registry
+
+            $elems.addClass(removeClass);
+            this.element.find('.'+removeClass).remove();
+            $elems.trigger('closed:bindtabs');
+
+            if(tab.hasClass(showClass)) {
+                this.show(this.getTabs().first()); // show first tab when closing showing tab
+            }
+            this.element.trigger('closed:bindtabs', {tab:tab, cntr:cntr});
         }
     }
 
