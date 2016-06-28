@@ -317,7 +317,7 @@
             this._addShowClass(tab, cntr);
             // show current tablist item
             this._trigger('show', [tab, cntr]);
-            tab.trigger('show:bindtabs');
+            // tab.trigger('show:bindtabs');
             return tab;
         }
 
