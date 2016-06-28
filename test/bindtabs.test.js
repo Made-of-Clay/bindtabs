@@ -12,7 +12,6 @@ describe('bindTabs', function () {
         it('should accept object init options', function () {
             var wrapId = 'simple-wrapper';
             var bt = clone(wrapId);
-
             var opts = {
                 tabs: '.tabs',
                 containers: $(`#${wrapId} > .containers`)
@@ -27,7 +26,6 @@ describe('bindTabs', function () {
         it('should accept data-attr init options', function() {
             var wrapId = 'simple-wrapper';
             var bt = clone(wrapId);
-
             bt.attr({
                 'data-boundtabs':'tabs',
                 'data-boundcontainers':'containers'
@@ -42,7 +40,6 @@ describe('bindTabs', function () {
         it('should assume if no options are sent, to initialize based on existing markup', function() {
             var wrapId = 'def-init';
             var bt = clone(wrapId);
-
             bt.bindTabs();
 
             // after init - has classes
@@ -52,7 +49,6 @@ describe('bindTabs', function () {
         it('should add plugin element classes to the wrapper, tabs, and containers', function () {
             var wrapId = 'add-el-classes';
             var bt = clone(wrapId);
-
             bt.bindTabs();
 
             // after init - has classes
@@ -63,7 +59,6 @@ describe('bindTabs', function () {
         it('should return an instance of the initialized object', function () {
             var wrapId = 'add-el-classes';
             var bt = clone(wrapId);
-
             bto = bt.bindTabs();
 
             bto[0]._name.should.equal('bindTabs');
@@ -71,7 +66,6 @@ describe('bindTabs', function () {
         it('should add element-specific plugin class for tabs', function () {
             var wrapId = '';
             var bt = clone(wrapId);
-
             bto = bt.bindTabs();
             bto = bto[0];
             var tabsHaveClass = eachHasClass('bt_tab', bto.tabs.children());
@@ -81,7 +75,6 @@ describe('bindTabs', function () {
         it('should add element-specific plugin class for containers', function () {
             var wrapId = 'add-cntr-class';
             var bt = clone(wrapId);
-
             bto = bt.bindTabs();
             bto = bto[0];
             var cntrsHaveClass = eachHasClass('bt_cntr', bto.containers.children());
@@ -90,7 +83,6 @@ describe('bindTabs', function () {
         });
         it('should have added data-pairid to each tab and container', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
 
@@ -105,7 +97,6 @@ describe('bindTabs', function () {
         });
         it('should hide all containers except for what "is-showing"', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
             var showingTab = bto.tabs.children('.'+showClass);
@@ -118,7 +109,6 @@ describe('bindTabs', function () {
         });
         it('should add a text wrapper around the tab name', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
 
@@ -131,7 +121,6 @@ describe('bindTabs', function () {
     describe('init options', function () {
         it('should add a close icon if the option is set to true', function () {
             var bt = clone();
-
             bto = bt.bindTabs({
                 closable: true
             });
@@ -146,7 +135,6 @@ describe('bindTabs', function () {
     describe('DOM events', function () {
         it('should show related container when tab is clicked', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
             var containers = bto.containers.children();
@@ -190,7 +178,6 @@ describe('bindTabs', function () {
         });
         it('should fire show events when showing tabs', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
             bto.getTabs().first().on('show:bindtabs', function () {
@@ -206,7 +193,6 @@ describe('bindTabs', function () {
     describe('API', function () {
         it('should expose show()', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
             var lastTab = bto.tabs.children('.bt_tab').last();
@@ -216,7 +202,6 @@ describe('bindTabs', function () {
         });
         it('should expose getCurrent()', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
             var firstTab = bto.tabs.children('').first();
@@ -226,7 +211,6 @@ describe('bindTabs', function () {
         });
         it('should expose an alias to getCurrent() called getCurTab()', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
             var firstTab = bto.tabs.children('').first();
@@ -236,7 +220,6 @@ describe('bindTabs', function () {
         });
         it('should expose an alias to getCurrent() called getCurCntr()', function () {
             var bt = clone();
-
             bto = bt.bindTabs();
             bto = bto[0];
             var firstCntr = bto.containers.children('').first();
