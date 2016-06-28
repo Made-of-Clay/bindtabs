@@ -13,7 +13,9 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^2.5.3",
-    "parallelshell": "^2.0.0"
+    "parallelshell": "^2.0.0",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0"
   },
   "scripts": {
     "build": "parallelshell 'npm run build:js' 'npm run build:css'",
