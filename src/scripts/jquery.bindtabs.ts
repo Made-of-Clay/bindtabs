@@ -241,7 +241,7 @@
 
         _trigger(event:string, collection:JQuery[]) {
             var evt:string = `${event}:bindtabs`;
-            $.each(collection, (index, elem) => {
+            $.each(collection, function triggerEventOnCollection(index, elem) {
                 $(elem).trigger(evt);
             });
         }
@@ -389,7 +389,7 @@
         var namespaced: string = `${pluginNs}-${pluginName}`;
         var instances = $();
 
-        this.each(function() {
+        this.each(() => {
             var $this = $(this);
             if (!$this.data(namespaced)) {
                 $this.data(namespaced, new BindTabs(this, options));

@@ -170,7 +170,7 @@ describe('bindTabs', function () {
     describe('custom published events', function () {
         it('should fire ready events when bindtabs is ready', function (done) {
             var spy = sinon.spy(btReady);
-            var bt = clone();
+            bt = clone();
             bt.on('ready:bindtabs', spy);
             bt.bindTabs();
 
@@ -179,23 +179,26 @@ describe('bindTabs', function () {
             }
             spy.should.have.been.calledOnce;
         });
-        it('should fire show events when showing tabs'/*, function () {
-            var bt = clone();
-            bto = bt.bindTabs();
-            bto = bto[0];
-            bto.getTabs().first().on('show:bindtabs', function () {
-                expect(event.type).to.equal('show:bindtabs');
-            })
+        it('should fire show events when showing tabs', function (done) {
+            var spy = sinon.spy(btReady);
+            bt = clone();
+            bto = bt.bindTabs()[0];
+            var tabs = bto.getTabs();
 
-            lastCntr.hasClass('is-showing').should.be.true;
-            firstCntr.hasClass('is-showing').should.be.false;
-        }*/);
+            tabs.on('show:bindtabs', spy);
+            tabs.last().click();
+
+            function btReady(event) {
+                done();
+            }
+            spy.should.have.been.calledOnce;
+        });
         it('should fire close(d) events when closing tabs');
     });
 
     describe('API', function () {
         it('should expose show()', function () {
-            var bt = clone();
+            bt = clone();
             bto = bt.bindTabs();
             bto = bto[0];
             var lastTab = bto.tabs.children('.bt_tab').last();
@@ -204,7 +207,7 @@ describe('bindTabs', function () {
             expect(lastTab.hasClass(showClass)).to.be.true;
         });
         it('should expose getCurrent()', function () {
-            var bt = clone();
+            bt = clone();
             bto = bt.bindTabs();
             bto = bto[0];
             var firstTab = bto.tabs.children('').first();
@@ -213,7 +216,7 @@ describe('bindTabs', function () {
             expect(firstTab.data('pairid')).to.equal(curTab.data('pairid'));
         });
         it('should expose an alias to getCurrent() called getCurTab()', function () {
-            var bt = clone();
+            bt = clone();
             bto = bt.bindTabs();
             bto = bto[0];
             var firstTab = bto.tabs.children('').first();
@@ -222,7 +225,7 @@ describe('bindTabs', function () {
             expect(firstTab.data('pairid')).to.equal(curTab.data('pairid'));
         });
         it('should expose an alias to getCurrent() called getCurCntr()', function () {
-            var bt = clone();
+            bt = clone();
             bto = bt.bindTabs();
             bto = bto[0];
             var firstCntr = bto.containers.children('').first();

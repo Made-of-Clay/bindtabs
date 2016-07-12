@@ -210,7 +210,7 @@
         };
         BindTabs.prototype._trigger = function (event, collection) {
             var evt = event + ":bindtabs";
-            $.each(collection, function (index, elem) {
+            $.each(collection, function triggerEventOnCollection(index, elem) {
                 $(elem).trigger(evt);
             });
         };
@@ -338,13 +338,14 @@
         return typeof toCheck === 'string';
     }
     $.fn[pluginName] = function (options, retElems) {
+        var _this = this;
         if (retElems === void 0) { retElems = false; }
         var namespaced = pluginNs + "-" + pluginName;
         var instances = $();
         this.each(function () {
-            var $this = $(this);
+            var $this = $(_this);
             if (!$this.data(namespaced)) {
-                $this.data(namespaced, new BindTabs(this, options));
+                $this.data(namespaced, new BindTabs(_this, options));
             }
             instances = instances.add($this.data(namespaced));
         });
