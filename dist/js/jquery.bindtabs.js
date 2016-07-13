@@ -208,11 +208,17 @@
             this.element.find(tab).addClass(showClass);
             this.element.find(container).addClass(showClass);
         };
-        BindTabs.prototype._trigger = function (event, collection) {
+        BindTabs.prototype._trigger = function (event, collection, data) {
+            if (data === void 0) { data = null; }
             var evt = event + ":bindtabs";
             $.each(collection, function triggerEventOnCollection(index, elem) {
-                $(elem).trigger(evt);
+                $(elem).trigger(evt, data);
             });
+        };
+        BindTabs.prototype._checkTabDisplay = function (tab) {
+            if (tab.hasClass(showClass)) {
+                this.show(this.getTabs().first()); // show first tab when closing showing tab
+            }
         };
         BindTabs.prototype.pairedTo = function (elem) {
             var group;
@@ -282,7 +288,6 @@
             return tab;
         };
         BindTabs.prototype.close = function (srcElem) {
-            var removeClass = 'TOBE_REMOVED';
             var tab;
             var cntr;
             var elem = this._checkElem(srcElem);
@@ -293,13 +298,10 @@
             var prevTab = tab.prev();
             // check closable
             // check event registry
-            $elems.addClass(removeClass);
-            this.element.find('.' + removeClass).remove();
-            $elems.trigger('closed:bindtabs');
-            if (tab.hasClass(showClass)) {
-                this.show(this.getTabs().first()); // show first tab when closing showing tab
-            }
-            this.element.trigger('closed:bindtabs', { tab: tab, cntr: cntr });
+            $elems.remove();
+            this._trigger('closed', [$elems]);
+            this._checkTabDisplay(tab);
+            this._trigger('closed', [this.element], { tab: tab, cntr: cntr });
         };
         return BindTabs;
     }());

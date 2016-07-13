@@ -239,11 +239,17 @@
             this.element.find(container).addClass(showClass);
         }
 
-        _trigger(event:string, collection:JQuery[]) {
+        _trigger(event:string, collection:JQuery[], data: any = null) {
             var evt:string = `${event}:bindtabs`;
             $.each(collection, function triggerEventOnCollection(index, elem) {
-                $(elem).trigger(evt);
+                $(elem).trigger(evt, data);
             });
+        }
+
+        _checkTabDisplay(tab: JQuery | HTMLElement) {
+            if(tab.hasClass(showClass)) {
+                this.show(this.getTabs().first()); // show first tab when closing showing tab
+            }
         }
 
         pairedTo(elem: JQuery | HTMLElement) {
@@ -322,7 +328,6 @@
         }
 
         close(srcElem?: JQuery | HTMLElement) {
-            var removeClass: string = 'TOBE_REMOVED';
             var tab: JQuery;
             var cntr: JQuery;
             var elem: JQuery = this._checkElem(srcElem);
@@ -335,14 +340,10 @@
             // check closable
             // check event registry
 
-            $elems.addClass(removeClass);
-            this.element.find('.'+removeClass).remove();
-            $elems.trigger('closed:bindtabs');
-
-            if(tab.hasClass(showClass)) {
-                this.show(this.getTabs().first()); // show first tab when closing showing tab
-            }
-            this.element.trigger('closed:bindtabs', {tab:tab, cntr:cntr});
+            $elems.remove();
+            this._trigger('closed', [$elems]);
+            this._checkTabDisplay(tab);
+            this._trigger('closed', [this.element], {tab:tab, cntr:cntr});
         }
     }
 

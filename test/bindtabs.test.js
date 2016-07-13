@@ -125,7 +125,7 @@ describe('bindTabs', function () {
                 closable: true
             });
             bto = bto[0];
-
+noRemove(bt);
             bto.tabs.children().each(function (index, elem) {
                 $(elem).children('.bt_closeTab').length.should.be.above(0);
             });
