@@ -167,6 +167,11 @@
             }
         }
 
+        /**
+         * Checks passed element for JQuery type and returns either JQuery object or null with error
+         * @param {any} elem
+         * @method
+         */
         _checkElem(elem) {
             if(!isString(elem) && typeof elem !== 'object') {
                 console.error('You must pass an object or string selector to _checkElem(). This was passed:',elem);
@@ -247,7 +252,8 @@
         }
 
         _checkTabDisplay(tab: JQuery | HTMLElement) {
-            if(tab.hasClass(showClass)) {
+            var $tab: JQuery = this._checkElem(tab);
+            if($tab.hasClass(showClass)) {
                 this.show(this.getTabs().first()); // show first tab when closing showing tab
             }
         }
@@ -340,8 +346,8 @@
             // check closable
             // check event registry
 
+            this._trigger('close', [$elems]);
             $elems.remove();
-            this._trigger('closed', [$elems]);
             this._checkTabDisplay(tab);
             this._trigger('closed', [this.element], {tab:tab, cntr:cntr});
         }

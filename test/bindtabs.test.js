@@ -125,7 +125,7 @@ describe('bindTabs', function () {
                 closable: true
             });
             bto = bto[0];
-noRemove(bt);
+
             bto.tabs.children().each(function (index, elem) {
                 $(elem).children('.bt_closeTab').length.should.be.above(0);
             });
@@ -169,31 +169,49 @@ noRemove(bt);
 
     describe('custom published events', function () {
         it('should fire ready events when bindtabs is ready', function (done) {
-            var spy = sinon.spy(btReady);
+            var readySpy = sinon.spy(btReady);
             bt = clone();
-            bt.on('ready:bindtabs', spy);
+            bt.on('ready:bindtabs', readySpy);
             bt.bindTabs();
 
             function btReady(event) {
                 done();
             }
-            spy.should.have.been.calledOnce;
+            readySpy.should.have.been.calledOnce;
         });
         it('should fire show events when showing tabs', function (done) {
-            var spy = sinon.spy(btReady);
+            var showSpy = sinon.spy(btShown);
             bt = clone();
             bto = bt.bindTabs()[0];
             var tabs = bto.getTabs();
 
-            tabs.on('show:bindtabs', spy);
+            tabs.on('show:bindtabs', showSpy);
             tabs.last().click();
 
-            function btReady(event) {
+            function btShown(event) {
                 done();
             }
-            spy.should.have.been.calledOnce;
+            showSpy.should.have.been.calledOnce;
         });
-        it('should fire close(d) events when closing tabs');
+        it('should fire close(d) events when closing tabs', function (done) {
+            var closeSpy = sinon.spy(btClose);
+            bt = clone();
+            bto = bt.bindTabs({ closable:true })[0];
+
+            var tabs = bto.getTabs();
+            var lastTab = tabs.last();
+            var count = 0;
+
+            bto.tabs.on('close:bindtabs', '.bt_tab', closeSpy);
+            bto.element.on('closed:bindtabs', closeSpy);
+            lastTab.children('.bt_closeTab').click();
+
+            function btClose(event) {
+                count++;
+                if(count === 2) { done(); }
+            }
+            closeSpy.should.have.been.calledTwice;
+        });
     });
 
     describe('API', function () {
@@ -233,6 +251,7 @@ noRemove(bt);
 
             expect(firstCntr.data('pairid')).to.equal(curCntr.data('pairid'));
         });
+        it('should not close tabs that are not closable');
     });
 });
 

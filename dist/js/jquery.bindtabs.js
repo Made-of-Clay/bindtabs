@@ -145,6 +145,11 @@
                 event.stopPropagation();
             }
         };
+        /**
+         * Checks passed element for JQuery type and returns either JQuery object or null with error
+         * @param {any} elem
+         * @method
+         */
         BindTabs.prototype._checkElem = function (elem) {
             if (!isString(elem) && typeof elem !== 'object') {
                 console.error('You must pass an object or string selector to _checkElem(). This was passed:', elem);
@@ -216,7 +221,8 @@
             });
         };
         BindTabs.prototype._checkTabDisplay = function (tab) {
-            if (tab.hasClass(showClass)) {
+            var $tab = this._checkElem(tab);
+            if ($tab.hasClass(showClass)) {
                 this.show(this.getTabs().first()); // show first tab when closing showing tab
             }
         };
@@ -298,8 +304,8 @@
             var prevTab = tab.prev();
             // check closable
             // check event registry
+            this._trigger('close', [$elems]);
             $elems.remove();
-            this._trigger('closed', [$elems]);
             this._checkTabDisplay(tab);
             this._trigger('closed', [this.element], { tab: tab, cntr: cntr });
         };
