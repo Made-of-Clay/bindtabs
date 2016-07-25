@@ -251,7 +251,15 @@ describe('bindTabs', function () {
 
             expect(firstCntr.data('pairid')).to.equal(curCntr.data('pairid'));
         });
-        it('should not close tabs that are not closable');
+        it('should not close tabs that are not closable', function () {
+            bt = clone();
+            bto = bt.bindTabs()[0];
+            var firstTab = bto.getTabs().first();
+            var firstTabPairId = firstTab.data('pairid');
+
+            bto.close(firstTab);
+            bto.getTabs().first().data('pairid').should.equal(firstTabPairId);
+        });
     });
 });
 

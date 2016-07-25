@@ -24,7 +24,8 @@
     const cntrClass = 'bt_cntr';
     const showClass = 'is-showing';
     const tabNameWrapClass = 'tabNameWrap';
-    const closableClass = 'bt_closeTab';
+    const closeIconClass = 'bt_closeTab';
+    const closableClass = 'bt_closable';
 
     class BindTabs {
         element: JQuery;
@@ -64,6 +65,8 @@
             } else {
                 this._checkMarkupForElems();
             }
+
+
         }
         _assignRelations(prop, elem) {
             var plugin = this;
@@ -95,7 +98,7 @@
         _addPluginMarkup() {
             this._addPluginClass();
             this._addPluginElClasses();
-            this._addSpTabMarkup();
+            this._addTabnameWrapper();
             this._addPairId();
             this._showStartingTab();
         }
@@ -115,16 +118,16 @@
             addClassToEach(tabClass, this.tabs.children());
             addClassToEach(cntrClass, this.containers.children());
         }
-        _addSpTabMarkup() {
+        _addTabnameWrapper() {
             var closeMarkup = $('<span>', {
-                class: closableClass,
+                class: closeIconClass,
                 html: '&times;'
             });
             var tabs = this.tabs.children('.bt_tab');
             tabs.wrapInner(this.tabNameWrapMarkup);
 
             if(this.options.closable) {
-                tabs.append((closeMarkup));
+                tabs.addClass(closableClass).append((closeMarkup));
             }
         }
         _addPairId() {
@@ -340,6 +343,13 @@
             var elements = this._assignElems(elem);
             tab = elements.tab;
             cntr = elements.cntr;
+
+            if(!tab.hasClass('bt_closable')) {
+                console.warn('This tab is not closable');
+                console.trace('close');
+                return;
+            }
+
             var $elems = $().add(tab).add(cntr);
             var prevTab = tab.prev();
 
