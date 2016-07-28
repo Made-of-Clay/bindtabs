@@ -161,6 +161,7 @@ describe('bindTabs', function () {
             bto.getTabs().length.should.equal(tabCount-1);
             bto.getContainers().length.should.equal(cntrCount-1);
         });
+        it('should hide tabs behind a toggle-able dropdown once the space for tabs runs out');
         // it('');
         // it('');
         // it('');
@@ -168,7 +169,7 @@ describe('bindTabs', function () {
     });
 
     describe('custom published events', function () {
-        it('should fire ready events when bindtabs is ready', function (done) {
+        it('should fire ready event after bindtabs is ready', function (done) {
             var readySpy = sinon.spy(btReady);
             bt = clone();
             bt.on('ready:bindtabs', readySpy);
@@ -179,7 +180,7 @@ describe('bindTabs', function () {
             }
             readySpy.should.have.been.calledOnce;
         });
-        it('should fire show events when showing tabs', function (done) {
+        it('should fire show event after showing a tab', function (done) {
             var showSpy = sinon.spy(btShown);
             bt = clone();
             bto = bt.bindTabs()[0];
@@ -193,7 +194,7 @@ describe('bindTabs', function () {
             }
             showSpy.should.have.been.calledOnce;
         });
-        it('should fire close(d) events when closing tabs', function (done) {
+        it('should fire close event after closing a tab', function (done) {
             var closeSpy = sinon.spy(btClose);
             bt = clone();
             bto = bt.bindTabs({ closable:true })[0];
@@ -212,6 +213,28 @@ describe('bindTabs', function () {
             }
             closeSpy.should.have.been.calledTwice;
         });
+    });
+
+    describe('custom event hooking', function () {
+        it('should allow hooking into individual tabs', function (done) {
+            bt = clone();
+            bto = bt.bindTabs()[0];
+            var lastTab = bto.tabs.children('.bt_tab').last();
+            var showSpy = sinon.spy(showHook);
+
+            bto.addEventHook('show', lastTab, showSpy);
+            lastTab.click();
+
+            function showHook() {
+                done();
+            }
+            showSpy.should.have.been.calledOnce;
+        });
+        it('should allow hooking into entire bindtabs instance');
+        it('should throw reference error if passed "tab" isn\'t tab|container|function');
+        it('should throw an error when function is not function or false');
+        it('should provide a hook for the show event');
+        it('should provide a hook for the close event');
     });
 
     describe('API', function () {

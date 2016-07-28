@@ -1,5 +1,6 @@
 /// <reference path="./jquery.d.ts" />
 /// <reference path="./bindtabs-options.d.ts" />
+/// <reference path="./bindtabs-event-registry-object.d.ts" />
 /*
     Custom Events:
     - shown
@@ -27,6 +28,7 @@
         function BindTabs(element, options) {
             this.pairIds = [];
             this.tabNameWrapMarkup = "<span class=\"" + tabNameWrapClass + "\">";
+            this.eventRegistry = {};
             this.element = $(element);
             this.options = $.extend({}, defaults, options);
             this._name = pluginName;
@@ -281,12 +283,10 @@
             var elems = this._assignElems(elem);
             tab = elems.tab;
             cntr = elems.cntr;
-            if (this._disabled(tab)) {
+            if (this._showing(tab) ||
+                this._disabled(tab) ||
+                this._checkEventRegistry('show', tab) === false)
                 return;
-            }
-            if (this._showing(tab)) {
-                return;
-            }
             this._removeShowClass();
             this._addShowClass(tab, cntr);
             // show current tablist item
@@ -314,6 +314,55 @@
             $elems.remove();
             this._checkTabDisplay(tab);
             this._trigger('closed', [this.element], { tab: tab, cntr: cntr });
+        };
+        BindTabs.prototype.addCloseHook = function (tab, func) {
+            this.addEventHook('close', tab, func);
+        };
+        BindTabs.prototype.addEventHook = function (event, tab, fn) {
+            // this._checkParams( {tab:tab, fn:fn} );
+            var theTab = this._prepTabForHook(tab);
+            this._addEventRegistry(event, { tab: tab, fn: fn });
+        };
+        BindTabs.prototype._checkParams = function (params) {
+            var tab, func;
+            if (typeof params.tab === 'function') {
+                func = params.tab;
+            } // else if(!params.tab)
+            // if(!$.isFunction(params.func) && params.func !== false) {
+            //     // throw new TypeError(`You must pass a function or boolean "false" to hook into the ${event} event`);
+            // }
+        };
+        BindTabs.prototype._prepTabForHook = function (tab) {
+            var checkedEl = this._checkElem(tab);
+            if (checkedEl.hasClass(cntrClass)) {
+                tab = this.pairedTo(checkedEl);
+            }
+            else if (!checkedEl.hasClass(tabClass)) {
+            }
+            return tab;
+        };
+        BindTabs.prototype._addEventRegistry = function (event, regObj) {
+            if (this.eventRegistry[event] === undefined) {
+                this.eventRegistry[event] = [];
+            }
+            this.eventRegistry[event].push(regObj);
+        };
+        BindTabs.prototype._checkEventRegistry = function (event, tab) {
+            var plugin = this;
+            var evtReg = this.eventRegistry[event];
+            var doEvent = true;
+            if (evtReg !== undefined) {
+                evtReg.forEach(checkEachReg);
+            }
+            return doEvent;
+            function checkEachReg(regObj) {
+                var checkTab = plugin._checkElem(regObj.tab);
+                if (tab.attr('id') === checkTab.attr('id')) {
+                    if (regObj.fn() === false) {
+                        doEvent = false;
+                    }
+                }
+            }
         };
         return BindTabs;
     }());
@@ -350,6 +399,9 @@
     }
     function isString(toCheck) {
         return typeof toCheck === 'string';
+    }
+    function isBool(toCheck) {
+        return typeof toCheck === 'boolean';
     }
     $.fn[pluginName] = function (options, retElems) {
         var _this = this;

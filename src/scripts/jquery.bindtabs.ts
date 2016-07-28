@@ -1,5 +1,6 @@
 /// <reference path="./jquery.d.ts" />
 /// <reference path="./bindtabs-options.d.ts" />
+/// <reference path="./bindtabs-event-registry-object.d.ts" />
 
 /*
     Custom Events:
@@ -35,6 +36,8 @@
         tabNameWrapMarkup: string = `<span class="${tabNameWrapClass}">`;
 
         options: BtOptions;
+
+        eventRegistry = {};
 
         _name: String;
         _defaults: Object;
@@ -192,7 +195,6 @@
             }
         }
 
-
         _assignElems(elem:JQuery) {
             var elements: { tab:any, cntr:any } = {
                 tab: null,
@@ -321,12 +323,9 @@
             tab = elems.tab;
             cntr = elems.cntr;
 
-            if(this._disabled(tab)) {
-                return;
-            }
-            if(this._showing(tab)) {
-                return;
-            }
+            if(this._showing(tab)  ||
+               this._disabled(tab) ||
+               this._checkEventRegistry('show', tab) === false) return;
 
             this._removeShowClass();
             this._addShowClass(tab, cntr);
@@ -360,6 +359,59 @@
             $elems.remove();
             this._checkTabDisplay(tab);
             this._trigger('closed', [this.element], {tab:tab, cntr:cntr});
+        }
+
+        addCloseHook(tab, func) {
+            this.addEventHook('close', tab, func)
+        }
+        addEventHook(event:string, tab, fn) {
+            // this._checkParams( {tab:tab, fn:fn} );
+            var theTab = this._prepTabForHook(tab);
+            this._addEventRegistry(event, { tab:tab, fn:fn });
+        }
+        _checkParams(params) {
+            var tab, func;
+            if(typeof params.tab === 'function') {
+                func = params.tab;
+            } // else if(!params.tab)
+            // if(!$.isFunction(params.func) && params.func !== false) {
+            //     // throw new TypeError(`You must pass a function or boolean "false" to hook into the ${event} event`);
+            // }
+        }
+        _prepTabForHook(tab: JQuery | HTMLElement) {
+            var checkedEl = this._checkElem(tab);
+            if(checkedEl.hasClass(cntrClass)) {
+                tab = this.pairedTo(checkedEl);
+            } else if(!checkedEl.hasClass(tabClass)) {
+                // throw new ReferenceError('"tab" was not a tab or a container');
+            }
+            return tab;
+        }
+        _addEventRegistry(event:string, regObj:BtEventRegistryObject) {
+            if(this.eventRegistry[event] === undefined) {
+                this.eventRegistry[event] = [];
+            }
+            this.eventRegistry[event].push(regObj);
+        }
+        _checkEventRegistry(event:string, tab:JQuery) {
+            var plugin = this;
+            var evtReg = this.eventRegistry[event];
+            var doEvent = true;
+
+            if(evtReg !== undefined) {
+                evtReg.forEach(checkEachReg);
+            }
+
+            return doEvent;
+
+            function checkEachReg(regObj) {
+                var checkTab = plugin._checkElem(regObj.tab);
+                if(tab.attr('id') === checkTab.attr('id')) {
+                    if(regObj.fn() === false) {
+                        doEvent = false;
+                    }
+                }
+            }
         }
     }
 
@@ -400,6 +452,9 @@
     }
     function isString(toCheck) {
         return typeof toCheck === 'string';
+    }
+    function isBool(toCheck) {
+        return typeof toCheck === 'boolean';
     }
 
     $.fn[pluginName] = function(options: Object, retElems: boolean = false) {
