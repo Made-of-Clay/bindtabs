@@ -315,22 +315,16 @@
             this._checkTabDisplay(tab);
             this._trigger('closed', [this.element], { tab: tab, cntr: cntr });
         };
-        BindTabs.prototype.addCloseHook = function (tab, func) {
-            this.addEventHook('close', tab, func);
-        };
         BindTabs.prototype.addEventHook = function (event, tab, fn) {
-            // this._checkParams( {tab:tab, fn:fn} );
-            var theTab = this._prepTabForHook(tab);
+            tab = this._prepTabForHook(tab);
+            fn = this._prepFnForHook(fn);
             this._addEventRegistry(event, { tab: tab, fn: fn });
         };
-        BindTabs.prototype._checkParams = function (params) {
-            var tab, func;
-            if (typeof params.tab === 'function') {
-                func = params.tab;
-            } // else if(!params.tab)
-            // if(!$.isFunction(params.func) && params.func !== false) {
-            //     // throw new TypeError(`You must pass a function or boolean "false" to hook into the ${event} event`);
-            // }
+        BindTabs.prototype.addShowHook = function (tab, func) {
+            this.addEventHook('show', tab, func);
+        };
+        BindTabs.prototype.addCloseHook = function (tab, func) {
+            this.addEventHook('close', tab, func);
         };
         BindTabs.prototype._prepTabForHook = function (tab) {
             var checkedEl = this._checkElem(tab);
@@ -338,8 +332,16 @@
                 tab = this.pairedTo(checkedEl);
             }
             else if (!checkedEl.hasClass(tabClass)) {
+                throw new ReferenceError('Event hook elements must be either a tab or container; none were passed');
             }
             return tab;
+        };
+        BindTabs.prototype._prepFnForHook = function (fn) {
+            if (!$.isFunction(fn) && fn !== false) {
+                throw new TypeError('Event hook callbacks must either be a function or boolean false (to prevent action from occurring)');
+            }
+            else
+                return fn;
         };
         BindTabs.prototype._addEventRegistry = function (event, regObj) {
             if (this.eventRegistry[event] === undefined) {

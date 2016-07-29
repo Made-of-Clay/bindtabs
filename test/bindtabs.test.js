@@ -2,6 +2,9 @@ describe('bindTabs', function () {
     var bt, bto;
     showClass = 'is-showing';
 
+    beforeEach(function() {
+        bt = clone();
+    })
     afterEach(function() {
         $('.wrapper').not('#template, .ignore').remove();
         bt = null;
@@ -11,7 +14,7 @@ describe('bindTabs', function () {
     describe('initialization', function () {
         it('should accept object init options', function () {
             var wrapId = 'simple-wrapper';
-            var bt = clone(wrapId);
+            bt = clone(wrapId);
             var opts = {
                 tabs: '.tabs',
                 containers: $(`#${wrapId} > .containers`)
@@ -25,7 +28,6 @@ describe('bindTabs', function () {
         });
         it('should accept data-attr init options', function() {
             var wrapId = 'simple-wrapper';
-            var bt = clone(wrapId);
             bt.attr({
                 'data-boundtabs':'tabs',
                 'data-boundcontainers':'containers'
@@ -39,7 +41,6 @@ describe('bindTabs', function () {
         });
         it('should assume if no options are sent, to initialize based on existing markup', function() {
             var wrapId = 'def-init';
-            var bt = clone(wrapId);
             bt.bindTabs();
 
             // after init - has classes
@@ -48,7 +49,6 @@ describe('bindTabs', function () {
         });
         it('should add plugin element classes to the wrapper, tabs, and containers', function () {
             var wrapId = 'add-el-classes';
-            var bt = clone(wrapId);
             bt.bindTabs();
 
             // after init - has classes
@@ -58,14 +58,12 @@ describe('bindTabs', function () {
         });
         it('should return an instance of the initialized object', function () {
             var wrapId = 'add-el-classes';
-            var bt = clone(wrapId);
             bto = bt.bindTabs();
 
             bto[0]._name.should.equal('bindTabs');
         });
         it('should add element-specific plugin class for tabs', function () {
             var wrapId = '';
-            var bt = clone(wrapId);
             bto = bt.bindTabs();
             bto = bto[0];
             var tabsHaveClass = eachHasClass('bt_tab', bto.tabs.children());
@@ -74,7 +72,6 @@ describe('bindTabs', function () {
         });
         it('should add element-specific plugin class for containers', function () {
             var wrapId = 'add-cntr-class';
-            var bt = clone(wrapId);
             bto = bt.bindTabs();
             bto = bto[0];
             var cntrsHaveClass = eachHasClass('bt_cntr', bto.containers.children());
@@ -82,7 +79,6 @@ describe('bindTabs', function () {
             cntrsHaveClass.should.be.true;
         });
         it('should have added data-pairid to each tab and container', function () {
-            var bt = clone();
             bto = bt.bindTabs();
             bto = bto[0];
 
@@ -96,7 +92,6 @@ describe('bindTabs', function () {
             // allHavePairIds.should.be.true;
         });
         it('should hide all containers except for what "is-showing"', function () {
-            var bt = clone();
             bto = bt.bindTabs();
             bto = bto[0];
             var showingTab = bto.tabs.children('.'+showClass);
@@ -108,7 +103,6 @@ describe('bindTabs', function () {
             onlyPairedCntrShows.should.be.true;
         });
         it('should add a text wrapper around the tab name', function () {
-            var bt = clone();
             bto = bt.bindTabs();
             bto = bto[0];
 
@@ -120,7 +114,6 @@ describe('bindTabs', function () {
 
     describe('init options', function () {
         it('should add a close icon if the option is set to true', function () {
-            var bt = clone();
             bto = bt.bindTabs({
                 closable: true
             });
@@ -134,7 +127,6 @@ describe('bindTabs', function () {
 
     describe('DOM events', function () {
         it('should show related container when tab is clicked', function () {
-            var bt = clone();
             bto = bt.bindTabs();
             bto = bto[0];
             var containers = bto.containers.children();
@@ -146,7 +138,6 @@ describe('bindTabs', function () {
             firstCntr.hasClass('is-showing').should.be.false;
         });
         it('should close the tab/cntr pair when the close icon is clicked', function () {
-            var bt = clone();
             bto = bt.bindTabs({
                 closable: true
             });
@@ -171,7 +162,6 @@ describe('bindTabs', function () {
     describe('custom published events', function () {
         it('should fire ready event after bindtabs is ready', function (done) {
             var readySpy = sinon.spy(btReady);
-            bt = clone();
             bt.on('ready:bindtabs', readySpy);
             bt.bindTabs();
 
@@ -182,7 +172,6 @@ describe('bindTabs', function () {
         });
         it('should fire show event after showing a tab', function (done) {
             var showSpy = sinon.spy(btShown);
-            bt = clone();
             bto = bt.bindTabs()[0];
             var tabs = bto.getTabs();
 
@@ -196,7 +185,6 @@ describe('bindTabs', function () {
         });
         it('should fire close event after closing a tab', function (done) {
             var closeSpy = sinon.spy(btClose);
-            bt = clone();
             bto = bt.bindTabs({ closable:true })[0];
 
             var tabs = bto.getTabs();
@@ -216,67 +204,93 @@ describe('bindTabs', function () {
     });
 
     describe('custom event hooking', function () {
-        it('should allow hooking into individual tabs', function (done) {
-            bt = clone();
+        it('should allow hooking into individual tabs (via tab or container)', function (done) {
             bto = bt.bindTabs()[0];
-            var lastTab = bto.tabs.children('.bt_tab').last();
+            var lastTab = bto.getTabs().last();
+            var lastCntr = bto.pairedTo(lastTab);
             var showSpy = sinon.spy(showHook);
+            var callCount = 0;
 
             bto.addEventHook('show', lastTab, showSpy);
+            bto.addEventHook('show', lastCntr, showSpy);
             lastTab.click();
 
             function showHook() {
-                done();
+                if(++callCount === 2) {
+                    done();
+                }
             }
-            showSpy.should.have.been.calledOnce;
+            showSpy.should.have.been.calledTwice;
         });
-        it('should allow hooking into entire bindtabs instance');
-        it('should throw reference error if passed "tab" isn\'t tab|container|function');
-        it('should throw an error when function is not function or false');
-        it('should provide a hook for the show event');
+        it('should throw reference error if passed "tab" isn\'t tab|container', function () {
+            bto = bt.bindTabs()[0];
+            function badHook() {
+                bto.addEventHook('show', 'poop', $.noop);
+            }
+            expect(badHook).to.throw(ReferenceError);
+        });
+        it('should throw an error when function is not function|false', function () {
+            bto = bt.bindTabs()[0];
+            var firstTab = bto.getTabs().first();
+            function goodFuncHook()     { bto.addEventHook('show', firstTab, $.noop); }
+            function goodFuncBoolHook() { bto.addEventHook('show', firstTab, false); }
+            function badStringHook()    { bto.addEventHook('show', firstTab, 'foobar'); }
+            function badFalseyHook()    { bto.addEventHook('show', firstTab); }
+            expect(goodFuncHook).to.not.throw(TypeError);
+            expect(goodFuncBoolHook).to.not.throw(TypeError);
+            expect(badStringHook).to.throw(TypeError);
+            expect(badFalseyHook).to.throw(TypeError);
+        });
+        it('should provide a hook for the show event', function (done) {
+            bto = bt.bindTabs()[0];
+            var lastTab = bto.getTabs().last();
+            var lastCntr = bto.pairedTo(lastTab);
+            var showSpy = sinon.spy(showHook);
+            var callCount = 0;
+
+            bto.addShowHook(lastTab, showSpy);
+            bto.addShowHook(lastCntr, showSpy);
+            lastTab.click();
+
+            function showHook() {
+                if(++callCount === 2) {
+                    done();
+                }
+            }
+            showSpy.should.have.been.calledTwice;
+        });
         it('should provide a hook for the close event');
     });
 
     describe('API', function () {
+        beforeEach(function () {
+            bto = bt.bindTabs()[0];
+        });
         it('should expose show()', function () {
-            bt = clone();
-            bto = bt.bindTabs();
-            bto = bto[0];
             var lastTab = bto.tabs.children('.bt_tab').last();
             bto.show(lastTab);
 
             expect(lastTab.hasClass(showClass)).to.be.true;
         });
         it('should expose getCurrent()', function () {
-            bt = clone();
-            bto = bt.bindTabs();
-            bto = bto[0];
             var firstTab = bto.tabs.children('').first();
             var curTab = bto.getCurrent('tab');
 
             expect(firstTab.data('pairid')).to.equal(curTab.data('pairid'));
         });
         it('should expose an alias to getCurrent() called getCurTab()', function () {
-            bt = clone();
-            bto = bt.bindTabs();
-            bto = bto[0];
             var firstTab = bto.tabs.children('').first();
             var curTab = bto.getCurTab('tab');
 
             expect(firstTab.data('pairid')).to.equal(curTab.data('pairid'));
         });
         it('should expose an alias to getCurrent() called getCurCntr()', function () {
-            bt = clone();
-            bto = bt.bindTabs();
-            bto = bto[0];
             var firstCntr = bto.containers.children('').first();
             var curCntr = bto.getCurCntr('container');
 
             expect(firstCntr.data('pairid')).to.equal(curCntr.data('pairid'));
         });
         it('should not close tabs that are not closable', function () {
-            bt = clone();
-            bto = bt.bindTabs()[0];
             var firstTab = bto.getTabs().first();
             var firstTabPairId = firstTab.data('pairid');
 

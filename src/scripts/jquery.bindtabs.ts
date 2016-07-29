@@ -361,31 +361,31 @@
             this._trigger('closed', [this.element], {tab:tab, cntr:cntr});
         }
 
-        addCloseHook(tab, func) {
-            this.addEventHook('close', tab, func)
-        }
+
         addEventHook(event:string, tab, fn) {
-            // this._checkParams( {tab:tab, fn:fn} );
-            var theTab = this._prepTabForHook(tab);
+            tab = this._prepTabForHook(tab);
+            fn = this._prepFnForHook(fn);
             this._addEventRegistry(event, { tab:tab, fn:fn });
         }
-        _checkParams(params) {
-            var tab, func;
-            if(typeof params.tab === 'function') {
-                func = params.tab;
-            } // else if(!params.tab)
-            // if(!$.isFunction(params.func) && params.func !== false) {
-            //     // throw new TypeError(`You must pass a function or boolean "false" to hook into the ${event} event`);
-            // }
+        addShowHook(tab, func) {
+            this.addEventHook('show', tab, func)
+        }
+        addCloseHook(tab, func) {
+            this.addEventHook('close', tab, func)
         }
         _prepTabForHook(tab: JQuery | HTMLElement) {
             var checkedEl = this._checkElem(tab);
             if(checkedEl.hasClass(cntrClass)) {
                 tab = this.pairedTo(checkedEl);
             } else if(!checkedEl.hasClass(tabClass)) {
-                // throw new ReferenceError('"tab" was not a tab or a container');
+                throw new ReferenceError('Event hook elements must be either a tab or container; none were passed');
             }
             return tab;
+        }
+        _prepFnForHook(fn) {
+            if(!$.isFunction(fn) && fn !== false) {
+                throw new TypeError('Event hook callbacks must either be a function or boolean false (to prevent action from occurring)');
+            } else return fn;
         }
         _addEventRegistry(event:string, regObj:BtEventRegistryObject) {
             if(this.eventRegistry[event] === undefined) {
