@@ -306,6 +306,8 @@
                 console.trace('close');
                 return;
             }
+            if (this._checkEventRegistry('close', tab) === false)
+                return;
             var $elems = $().add(tab).add(cntr);
             var prevTab = tab.prev();
             // check closable

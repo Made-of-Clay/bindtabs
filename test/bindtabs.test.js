@@ -5,11 +5,7 @@ describe('bindTabs', function () {
     beforeEach(function() {
         bt = clone();
     })
-    afterEach(function() {
-        $('.wrapper').not('#template, .ignore').remove();
-        bt = null;
-        bto = null;
-    });
+    afterEach(cleanup);
     
     describe('initialization', function () {
         it('should accept object init options', function () {
@@ -204,8 +200,10 @@ describe('bindTabs', function () {
     });
 
     describe('custom event hooking', function () {
-        it('should allow hooking into individual tabs (via tab or container)', function (done) {
+        beforeEach(function () {
             bto = bt.bindTabs()[0];
+        });
+        it('should allow hooking into individual tabs (via tab or container)', function (done) {
             var lastTab = bto.getTabs().last();
             var lastCntr = bto.pairedTo(lastTab);
             var showSpy = sinon.spy(showHook);
@@ -223,14 +221,12 @@ describe('bindTabs', function () {
             showSpy.should.have.been.calledTwice;
         });
         it('should throw reference error if passed "tab" isn\'t tab|container', function () {
-            bto = bt.bindTabs()[0];
             function badHook() {
                 bto.addEventHook('show', 'poop', $.noop);
             }
             expect(badHook).to.throw(ReferenceError);
         });
         it('should throw an error when function is not function|false', function () {
-            bto = bt.bindTabs()[0];
             var firstTab = bto.getTabs().first();
             function goodFuncHook()     { bto.addEventHook('show', firstTab, $.noop); }
             function goodFuncBoolHook() { bto.addEventHook('show', firstTab, false); }
@@ -242,7 +238,6 @@ describe('bindTabs', function () {
             expect(badFalseyHook).to.throw(TypeError);
         });
         it('should provide a hook for the show event', function (done) {
-            bto = bt.bindTabs()[0];
             var lastTab = bto.getTabs().last();
             var lastCntr = bto.pairedTo(lastTab);
             var showSpy = sinon.spy(showHook);
@@ -259,7 +254,27 @@ describe('bindTabs', function () {
             }
             showSpy.should.have.been.calledTwice;
         });
-        it('should provide a hook for the close event');
+        it('should provide a hook for the close event', function (done) {
+            cleanup();
+            bt = clone();
+            bto = bt.bindTabs({ closable:true })[0];
+            var lastTab = bto.getTabs().last();
+            var lastCntr = bto.pairedTo(lastTab);
+            var closeSpy = sinon.spy(closeHook);
+            var callCount = 0;
+
+            bto.addCloseHook(lastTab, closeSpy);
+            bto.addCloseHook(lastCntr, closeSpy);
+
+            lastTab.find('.bt_closeTab').click();
+
+            function closeHook() {
+                if(++callCount === 2) {
+                    done();
+                }
+            }
+            closeSpy.should.have.been.calledTwice;
+        });
     });
 
     describe('API', function () {
@@ -291,15 +306,22 @@ describe('bindTabs', function () {
             expect(firstCntr.data('pairid')).to.equal(curCntr.data('pairid'));
         });
         it('should not close tabs that are not closable', function () {
+            console.groupCollapsed('Test: should not close unclosable tabs');
             var firstTab = bto.getTabs().first();
             var firstTabPairId = firstTab.data('pairid');
 
             bto.close(firstTab);
             bto.getTabs().first().data('pairid').should.equal(firstTabPairId);
+            console.groupEnd();
         });
     });
 });
 
+function cleanup() {
+    $('.wrapper').not('#template, .ignore').remove();
+    bt = null;
+    bto = null;
+}
 function clone(id) {
     id = (id !== undefined) ? id : '';
     return $('#template').clone().appendTo(document.body).attr('id', id);

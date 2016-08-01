@@ -349,6 +349,8 @@
                 return;
             }
 
+            if(this._checkEventRegistry('close', tab) === false) return;
+
             var $elems = $().add(tab).add(cntr);
             var prevTab = tab.prev();
 
@@ -371,7 +373,7 @@
             this.addEventHook('show', tab, func)
         }
         addCloseHook(tab, func) {
-            this.addEventHook('close', tab, func)
+            this.addEventHook('close', tab, func);
         }
         _prepTabForHook(tab: JQuery | HTMLElement) {
             var checkedEl = this._checkElem(tab);
