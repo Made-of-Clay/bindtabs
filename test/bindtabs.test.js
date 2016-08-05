@@ -54,29 +54,26 @@ describe('bindTabs', function () {
         });
         it('should return an instance of the initialized object', function () {
             var wrapId = 'add-el-classes';
-            bto = bt.bindTabs();
+            bto = bt.bindTabs()[0];
 
-            bto[0]._name.should.equal('bindTabs');
+            bto._name.should.equal('bindTabs');
         });
         it('should add element-specific plugin class for tabs', function () {
             var wrapId = '';
-            bto = bt.bindTabs();
-            bto = bto[0];
-            var tabsHaveClass = eachHasClass('bt_tab', bto.tabs.children());
+            bto = bt.bindTabs()[0];
+            var tabsHaveClass = eachHasClass('bt_tab', bto.getTabs());
 
             tabsHaveClass.should.be.true;
         });
         it('should add element-specific plugin class for containers', function () {
             var wrapId = 'add-cntr-class';
-            bto = bt.bindTabs();
-            bto = bto[0];
+            bto = bt.bindTabs()[0];
             var cntrsHaveClass = eachHasClass('bt_cntr', bto.containers.children());
 
             cntrsHaveClass.should.be.true;
         });
         it('should have added data-pairid to each tab and container', function () {
-            bto = bt.bindTabs();
-            bto = bto[0];
+            bto = bt.bindTabs()[0];
 
             var allHavePairIds = true;
             bto.element.find('.bt_tab, .bt_cntr').each(function (index, elem) {
@@ -88,8 +85,7 @@ describe('bindTabs', function () {
             // allHavePairIds.should.be.true;
         });
         it('should hide all containers except for what "is-showing"', function () {
-            bto = bt.bindTabs();
-            bto = bto[0];
+            bto = bt.bindTabs()[0];
             var showingTab = bto.tabs.children('.'+showClass);
             var showingCntr = bto.pairedTo(showingTab);
             var onlyPairedCntrShows = checkIfCntrsHidden(bto.containers.children(), showingCntr);
@@ -99,10 +95,9 @@ describe('bindTabs', function () {
             onlyPairedCntrShows.should.be.true;
         });
         it('should add a text wrapper around the tab name', function () {
-            bto = bt.bindTabs();
-            bto = bto[0];
+            bto = bt.bindTabs()[0];
 
-            bto.tabs.children().each(function (index, elem) {
+            bto.getTabs().each(function (index, elem) {
                 $(elem).children('.tabNameWrap').length.should.be.above(0);
             });
         });
@@ -115,9 +110,24 @@ describe('bindTabs', function () {
             });
             bto = bto[0];
 
-            bto.tabs.children().each(function (index, elem) {
-                $(elem).children('.bt_closeTab').length.should.be.above(0);
+            bto.getTabs().each(function (index, elem) {
+                var closeTabCount = $(elem).children('.bt_closeTab').length;
+                closeTabCount.should.be.above(0);
             });
+        });
+        it('should add the tablist if the option is set to true', function () {
+            bto = bt.bindTabs({ tablist:true })[0];
+
+            // :::TODO ::: change "notab" to "bt_notab" and then eventually "bt-notab"
+            var listToggle = bto.tabs.children('.notab');
+            var listToggleCount = listToggle.length;
+
+            var tabListItems = listToggle.find('.bt_listItem');
+            var tabListItemCount = tabListItems.length;
+            var oneTabLiPerTab = (bto.getTabs().length === tabListItemCount);
+
+            listToggleCount.should.equal(1); // should be one list toggle item
+            expect(oneTabLiPerTab).to.be.true; // one tab li for each tab
         });
     });
 
@@ -130,15 +140,15 @@ describe('bindTabs', function () {
             var lastCntr = containers.last();
             bto.pairedTo(lastCntr).click();
 
-            lastCntr.hasClass('is-showing').should.be.true;
-            firstCntr.hasClass('is-showing').should.be.false;
+            lastCntr.hasClass(showClass).should.be.true;
+            firstCntr.hasClass(showClass).should.be.false;
         });
         it('should close the tab/cntr pair when the close icon is clicked', function () {
             bto = bt.bindTabs({
                 closable: true
             });
             bto = bto[0];
-            var tabs = bto.tabs.children('.bt_tab');
+            var tabs = bto.getTabs();
             var cntrs = bto.containers.children('.bt_cntr');
             var tabCount = tabs.length;
             var cntrCount = cntrs.length;
@@ -149,7 +159,20 @@ describe('bindTabs', function () {
             bto.getContainers().length.should.equal(cntrCount-1);
         });
         it('should hide tabs behind a toggle-able dropdown once the space for tabs runs out');
-        // it('');
+        it('should show the tablist when the tablist icon is clicked', function () {
+            bto = bt.bindTabs()[0];
+            var notab = bto.tabs.find('.notab');
+            var tablistShowingBeforeClick = notab.hasClass(showClass);
+noRemove(bt);
+
+            notab.click();
+            var tablistShowingAfterClick = notab.hasClass(showClass);
+
+            expect(tablistShowingBeforeClick).to.be.false;
+            expect(tablistShowingAfterClick).to.be.true;
+        });
+        it('should show a tab when its corresponding tablist item is clicked');
+        it('should close a tab when its corresponding tablist item is closed');
         // it('');
         // it('');
         // it('');
@@ -275,6 +298,24 @@ describe('bindTabs', function () {
             }
             closeSpy.should.have.been.calledTwice;
         });
+        it('should provide a hook for the showlist event'/*, function (done) {
+            var lastTab = bto.getTabs().last();
+            var lastCntr = bto.pairedTo(lastTab);
+            var closeSpy = sinon.spy(closeHook);
+            var callCount = 0;
+
+            bto.addCloseHook(lastTab, closeSpy);
+            bto.addCloseHook(lastCntr, closeSpy);
+
+            lastTab.find('.bt_closeTab').click();
+
+            function closeHook() {
+                if(++callCount === 2) {
+                    done();
+                }
+            }
+            closeSpy.should.have.been.calledTwice;
+        }*/);
     });
 
     describe('API', function () {
@@ -282,7 +323,7 @@ describe('bindTabs', function () {
             bto = bt.bindTabs()[0];
         });
         it('should expose show()', function () {
-            var lastTab = bto.tabs.children('.bt_tab').last();
+            var lastTab = bto.getTabs().last();
             bto.show(lastTab);
 
             expect(lastTab.hasClass(showClass)).to.be.true;

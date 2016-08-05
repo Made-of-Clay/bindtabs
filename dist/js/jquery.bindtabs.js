@@ -10,7 +10,8 @@
 (function pluginSetupWrapper() {
     var pluginName = 'bindTabs', pluginNs = 'moc';
     var defaults = {
-        closable: false
+        closable: false,
+        tablist: true
     };
     /*
     possible additions:
@@ -51,6 +52,9 @@
             else {
                 this._checkMarkupForElems();
             }
+            if (!isBool(opts.tablist)) {
+                opts.tablist = true;
+            }
         };
         BindTabs.prototype._assignRelations = function (prop, elem) {
             var plugin = this;
@@ -84,6 +88,7 @@
             this._addTabnameWrapper();
             this._addPairId();
             this._showStartingTab();
+            this._checkForTablist();
         };
         BindTabs.prototype._addPluginClass = function () {
             var plugin = this;
@@ -133,6 +138,17 @@
         BindTabs.prototype._showStartingTab = function (showFirstInSet) {
             if (showFirstInSet === void 0) { showFirstInSet = false; }
             this.show(this.tabs.children().first());
+        };
+        BindTabs.prototype._checkForTablist = function () {
+            if (this.options.tablist) {
+                var tabsWithoutNotab = this.tabs.html();
+                var tabListBtn = $('<li>', { class: 'notab' }).appendTo(this.tabs);
+                var tabListToggle = $('<span>', { class: 'bt_toggle' }).appendTo(tabListBtn);
+                var tabList = $('<ul>', { class: 'bt_list' }).appendTo(tabListBtn);
+                tabListBtn.children('.bt_list')
+                    .html(tabsWithoutNotab)
+                    .find('.bt_tab').toggleClass('bt_tab bt_listItem');
+            }
         };
         BindTabs.prototype._initListeners = function () {
             var plugin = this;

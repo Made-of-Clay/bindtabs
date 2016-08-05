@@ -11,7 +11,8 @@
     var pluginName: string = 'bindTabs',
         pluginNs: string = 'moc';
     var defaults = {
-        closable: false
+        closable: false,
+        tablist: true
     };
 
     /*
@@ -69,7 +70,9 @@
                 this._checkMarkupForElems();
             }
 
-
+            if(!isBool(opts.tablist)) {
+                opts.tablist = true;
+            }
         }
         _assignRelations(prop, elem) {
             var plugin = this;
@@ -104,6 +107,7 @@
             this._addTabnameWrapper();
             this._addPairId();
             this._showStartingTab();
+            this._checkForTablist();
         }
         _addPluginClass() {
             var plugin = this;
@@ -154,6 +158,35 @@
         }
         _showStartingTab(showFirstInSet: boolean = false) {
             this.show(this.tabs.children().first());
+        }
+
+        _checkForTablist() {
+            if(this.options.tablist) {
+                var tabsWithoutNotab = this.tabs.html();
+                var tabListBtn = $('<li>', { class:'notab' }).appendTo(this.tabs);
+                var tabListToggle = $('<span>', { class:'bt_toggle' }).appendTo(tabListBtn)
+                var tabList = $('<ul>', { class:'bt_list' }).appendTo(tabListBtn);
+
+                tabListBtn.children('.bt_list')
+                    .html(tabsWithoutNotab)
+                    .find('.bt_tab').toggleClass('bt_tab bt_listItem')
+                        // .wrapInner('<span class="tabNameWrap">')
+                        // .prepend('- '); // might need this conditionally for children elements if they are children on init
+
+                // var tabListKids = tabListBtn.find('.bt_listItem');
+
+                // // ::: loop tabListKids to add parenttab data and remove Id
+                // for(x=0; x<tabListKids.length; x++) {
+                //     var cur = tabListKids[x],
+                //         targetTab = tabListBtn.find('#'+cur.id);
+
+                //     targetTab.attr('data-parenttab', cur.id).removeAttr('id');
+
+                //     if(targetTab.children('.bt_closeTab').length > 0) {
+                //         targetTab.append(this.closeMrkp);
+                //     }
+                // }
+            }
         }
 
         _initListeners() {
