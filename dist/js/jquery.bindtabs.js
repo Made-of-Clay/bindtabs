@@ -52,7 +52,7 @@
             else {
                 this._checkMarkupForElems();
             }
-            if (!isBool(opts.tablist)) {
+            if (!is('boolean', opts.tablist)) {
                 opts.tablist = true;
             }
         };
@@ -161,7 +161,13 @@
                     .on('click', '.bt_listItem', showTabFromTablist);
             }
             function closeClkdPair(event) {
-                var tab = $(this).closest('.bt_tab');
+                var pairId;
+                var $this = $(this);
+                var tab = $this.closest('.bt_tab');
+                if (tab.length === 0) {
+                    pairId = $this.closest('.bt_listItem').data('pairid');
+                    tab = plugin.getTabs().filter("[data-pairid=\"" + pairId + "\"]");
+                }
                 plugin.close(tab);
                 event.stopPropagation();
             }
@@ -183,7 +189,8 @@
          * @method
          */
         BindTabs.prototype._checkElem = function (elem) {
-            if (!isString(elem) && typeof elem !== 'object') {
+            // if(!isString(elem) && typeof elem !== 'object') {
+            if (!is('string', elem) && !is('object', elem)) {
                 console.error('You must pass an object or string selector to _checkElem(). This was passed:', elem);
                 return null;
             }
@@ -339,6 +346,11 @@
                 return;
             var $elems = $().add(tab).add(cntr);
             var prevTab = tab.prev();
+            if (this.options.closable) {
+                var pairId = tab.data('pairid');
+                var pairedTabLi = this.tabs.children('.notab').find(".bt_listItem[data-pairid=\"" + pairId + "\"]");
+                $elems = $elems.add(pairedTabLi);
+            }
             // check closable
             // check event registry
             this._trigger('close', [$elems]);
@@ -411,9 +423,9 @@
     function isJQuery(toCheck) {
         return toCheck instanceof jQuery;
     }
-    function isSet(toCheck) {
-        return typeof toCheck !== 'undefined';
-    }
+    // function isSet(toCheck) {
+    //     return typeof toCheck !== 'undefined';
+    // }
     function isEmpty(mixed_var) {
         var undef, key, i, len;
         var emptyValues = [undef, null, false, 0, '', '0'];
@@ -430,9 +442,16 @@
         }
         return false;
     }
-    function isString(toCheck) {
-        return typeof toCheck === 'string';
+    function is(type, toCheck) {
+        type = (type === 'set') ? 'undefined' : type;
+        return typeof toCheck === type;
     }
+    // function isString(toCheck) {
+    //     return typeof toCheck === 'string';
+    // }
+    // function isObject(toCheck) {
+    //     return typeof toCheck === 'object';
+    // }
     function isInString(needle, haystack, useAnd) {
         var glue, rxp, pattern;
         useAnd = (typeof useAnd === 'boolean') ? useAnd : false;
@@ -441,9 +460,9 @@
         rxp = new RegExp(pattern);
         return haystack.search(rxp) > -1;
     }
-    function isBool(toCheck) {
-        return typeof toCheck === 'boolean';
-    }
+    // function isBool(toCheck) {
+    //     return typeof toCheck === 'boolean';
+    // }
     $.fn[pluginName] = function (options, retElems) {
         var _this = this;
         if (retElems === void 0) { retElems = false; }

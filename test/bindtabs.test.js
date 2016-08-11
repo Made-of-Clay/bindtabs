@@ -177,11 +177,29 @@ describe('bindTabs', function () {
 
             notab.find('.bt_listItem').last().click();
             var lastTabShowing = bto.getTabs().last().hasClass(showClass);
-noRemove(bt);
 
             expect(lastTabShowing).to.be.true;
         });
-        it('should close a tab when its corresponding tablist item is closed');
+        it('should close a tab when its corresponding tablist item is closed', function () {
+            bto = bt.bindTabs({ closable:true })[0];
+            var firstTabPairId = bto.getTabs().first().data('pairid');
+            var tabCountBefore = bto.getTabs().length;
+            var notab = bto.tabs.find('.notab');
+            notab.click();
+
+            var lastTabListItem = notab.find('.bt_listItem').last();
+            var lastTabListItemCloseIcon = lastTabListItem.children('.bt_closeTab');
+            var tabListItemHasClosableIcon = lastTabListItemCloseIcon.length > 0;
+            lastTabListItemCloseIcon.click();
+
+            var tabCountAfter = bto.getTabs().length;
+            var lastTabPairId = bto.getTabs().last().data('pairid');
+            var tablistCount = notab.find('.bt_listItem').length;
+
+            tabCountBefore.should.be.above(tabCountAfter);
+            lastTabPairId.should.equal(firstTabPairId); // 'cause tab 2 was closed, so last tab is now tab 1
+            tabCountAfter.should.equal(tablistCount);
+        });
         // it('');
         // it('');
         // it('');
