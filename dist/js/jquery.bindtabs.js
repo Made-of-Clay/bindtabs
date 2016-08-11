@@ -141,27 +141,40 @@
         };
         BindTabs.prototype._checkForTablist = function () {
             if (this.options.tablist) {
-                var tabsWithoutNotab = this.tabs.html();
+                var tabsWithoutList = this.tabs.html();
                 var tabListBtn = $('<li>', { class: 'notab' }).appendTo(this.tabs);
                 var tabListToggle = $('<span>', { class: 'bt_toggle' }).appendTo(tabListBtn);
-                var tabList = $('<ul>', { class: 'bt_list' }).appendTo(tabListBtn);
-                tabListBtn.children('.bt_list')
-                    .html(tabsWithoutNotab)
-                    .find('.bt_tab').toggleClass('bt_tab bt_listItem');
+                var tabList = $('<ul>', { class: 'bt_list', html: tabsWithoutList }).appendTo(tabListBtn);
+                tabList.find('.bt_tab').toggleClass('bt_tab bt_listItem');
             }
         };
         BindTabs.prototype._initListeners = function () {
             var plugin = this;
-            plugin.element
-                .on('click', '.bt_tab', showClkdPair)
-                .on('click', '.bt_closeTab', closeClkdPair);
-            function showClkdPair(event) {
+            plugin.tabs
+                .on('click', '.bt_tab', function showClkdPair(event) {
                 plugin.show(event.currentTarget);
+            })
+                .on('click', '.bt_closeTab', closeClkdPair);
+            if (plugin.options.tablist) {
+                plugin.tabs
+                    .on('click', '.notab', toggleTabList)
+                    .on('click', '.bt_listItem', showTabFromTablist);
             }
             function closeClkdPair(event) {
                 var tab = $(this).closest('.bt_tab');
                 plugin.close(tab);
                 event.stopPropagation();
+            }
+            function toggleTabList(event) {
+                var targetClasses = $(event.target).attr('class');
+                if (isInString(['notab', 'bt_toggle'], targetClasses)) {
+                    $(event.currentTarget).toggleClass(showClass);
+                }
+            }
+            function showTabFromTablist(event) {
+                var pairId = $(this).data('pairid');
+                var tab = plugin.getTabs().filter("[data-pairid=\"" + pairId + "\"]");
+                plugin.show(tab);
             }
         };
         /**
@@ -219,11 +232,11 @@
             var showSelector = '.' + showClass;
             var elements = $();
             if (isEmpty(tab.length)) {
-                tab = tab.add(this.tabs.children('.is-showing'));
+                tab = tab.add(this.tabs.children('.' + showClass));
             }
             elements = elements.add(tab);
             if (isEmpty(container.length)) {
-                container = this.containers.children('.is-showing');
+                container = this.containers.children('.' + showClass);
             }
             elements = elements.add(container);
             elements.removeClass(showClass).trigger('blur:bindtabs');
@@ -419,6 +432,14 @@
     }
     function isString(toCheck) {
         return typeof toCheck === 'string';
+    }
+    function isInString(needle, haystack, useAnd) {
+        var glue, rxp, pattern;
+        useAnd = (typeof useAnd === 'boolean') ? useAnd : false;
+        glue = useAnd ? '&' : '|';
+        pattern = (Array.isArray(needle)) ? needle.join(glue) : needle;
+        rxp = new RegExp(pattern);
+        return haystack.search(rxp) > -1;
     }
     function isBool(toCheck) {
         return typeof toCheck === 'boolean';

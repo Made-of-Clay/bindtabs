@@ -162,47 +162,47 @@
 
         _checkForTablist() {
             if(this.options.tablist) {
-                var tabsWithoutNotab = this.tabs.html();
+                var tabsWithoutList = this.tabs.html();
                 var tabListBtn = $('<li>', { class:'notab' }).appendTo(this.tabs);
                 var tabListToggle = $('<span>', { class:'bt_toggle' }).appendTo(tabListBtn)
-                var tabList = $('<ul>', { class:'bt_list' }).appendTo(tabListBtn);
+                var tabList = $('<ul>', { class:'bt_list', html:tabsWithoutList }).appendTo(tabListBtn);
 
-                tabListBtn.children('.bt_list')
-                    .html(tabsWithoutNotab)
-                    .find('.bt_tab').toggleClass('bt_tab bt_listItem')
-                        // .wrapInner('<span class="tabNameWrap">')
-                        // .prepend('- '); // might need this conditionally for children elements if they are children on init
-
-                // var tabListKids = tabListBtn.find('.bt_listItem');
-
-                // // ::: loop tabListKids to add parenttab data and remove Id
-                // for(x=0; x<tabListKids.length; x++) {
-                //     var cur = tabListKids[x],
-                //         targetTab = tabListBtn.find('#'+cur.id);
-
-                //     targetTab.attr('data-parenttab', cur.id).removeAttr('id');
-
-                //     if(targetTab.children('.bt_closeTab').length > 0) {
-                //         targetTab.append(this.closeMrkp);
-                //     }
-                // }
+                tabList.find('.bt_tab').toggleClass('bt_tab bt_listItem');
             }
         }
 
         _initListeners() {
             var plugin = this;
-            plugin.element
-                .on('click', '.bt_tab', showClkdPair)
+
+            plugin.tabs
+                .on('click', '.bt_tab', function showClkdPair(event) {
+                    plugin.show(event.currentTarget);
+                })
                 .on('click', '.bt_closeTab', closeClkdPair)
             ;
 
-            function showClkdPair(event) {
-                plugin.show(event.currentTarget);
+            if(plugin.options.tablist) {
+                plugin.tabs
+                    .on('click', '.notab', toggleTabList)
+                    .on('click', '.bt_listItem', showTabFromTablist)
+                ;
             }
+
             function closeClkdPair(event) {
                 var tab = $(this).closest('.bt_tab');
                 plugin.close(tab);
                 event.stopPropagation();
+            }
+            function toggleTabList(event) {
+                var targetClasses : string = $(event.target).attr('class');
+                if(isInString(['notab','bt_toggle'], targetClasses)) {
+                    $(event.currentTarget).toggleClass(showClass);
+                }
+            }
+            function showTabFromTablist(event) {
+                var pairId = $(this).data('pairid');
+                var tab = plugin.getTabs().filter(`[data-pairid="${pairId}"]`);
+                plugin.show(tab);
             }
         }
 
@@ -265,12 +265,12 @@
             var elements = $();
 
             if(isEmpty(tab.length)) {
-                tab = tab.add(this.tabs.children('.is-showing'));
+                tab = tab.add(this.tabs.children('.'+showClass));
             }
             elements = elements.add(tab);
 
             if(isEmpty(container.length)) {
-                container = this.containers.children('.is-showing');
+                container = this.containers.children('.'+showClass);
             }
             elements = elements.add(container);
 
@@ -487,6 +487,14 @@
     }
     function isString(toCheck) {
         return typeof toCheck === 'string';
+    }
+    function isInString(needle:string|string[], haystack:string, useAnd?:boolean) {
+        var glue:string, rxp, pattern:string;
+        useAnd  = (typeof useAnd === 'boolean') ? useAnd : false;
+        glue    = useAnd ? '&' : '|';
+        pattern = (Array.isArray(needle)) ? needle.join(glue) : needle;
+        rxp     = new RegExp(pattern);
+        return haystack.search(rxp) > -1;
     }
     function isBool(toCheck) {
         return typeof toCheck === 'boolean';

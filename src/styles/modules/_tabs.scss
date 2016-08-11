@@ -22,6 +22,9 @@
         display: inline-block;
         vertical-align: baseline;
     }
+    @include selection(true) {
+        background: transparent;
+    }
 }
 
 .notab {
@@ -49,6 +52,8 @@
 }
 
 .bt_list {
+    background-color: $defBgColor;
+    color: $defFgColor;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -61,14 +66,35 @@
     top: 100%;
     width: 150px;
 
-    &.#{$showClass} {
+    .notab.#{$showClass} > & {
         @include transform(scale(1,1));
     }
     .no-csstransform & {
         display: none;
 
-        &.#{$showClass} {
+        .notab.#{$showClass} > & {
             display: block;
+        }
+    }
+}
+.bt_listItem {
+    border-top: 1px solid rgba(black, 0.25);
+    box-sizing: border-box;
+    padding: 0.25em 1.25em 0.25em 0.25em;
+    position: relative;
+    transition: background-color 0.25s;
+
+    &:hover {
+        background-color: rgba(white, 0.25);
+    }
+    &:first-child {
+        border-top: none;
+    }
+    &#{$markedClass} {
+        &:before {
+            content: '*';
+            display: inline-block;
+            margin-right: 0.5em;
         }
     }
 }

@@ -163,7 +163,6 @@ describe('bindTabs', function () {
             bto = bt.bindTabs()[0];
             var notab = bto.tabs.find('.notab');
             var tablistShowingBeforeClick = notab.hasClass(showClass);
-noRemove(bt);
 
             notab.click();
             var tablistShowingAfterClick = notab.hasClass(showClass);
@@ -171,7 +170,17 @@ noRemove(bt);
             expect(tablistShowingBeforeClick).to.be.false;
             expect(tablistShowingAfterClick).to.be.true;
         });
-        it('should show a tab when its corresponding tablist item is clicked');
+        it('should show a tab when its corresponding tablist item is clicked', function () {
+            bto = bt.bindTabs()[0];
+            var notab = bto.tabs.find('.notab');
+            notab.click();
+
+            notab.find('.bt_listItem').last().click();
+            var lastTabShowing = bto.getTabs().last().hasClass(showClass);
+noRemove(bt);
+
+            expect(lastTabShowing).to.be.true;
+        });
         it('should close a tab when its corresponding tablist item is closed');
         // it('');
         // it('');
