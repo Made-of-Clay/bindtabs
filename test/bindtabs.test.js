@@ -282,6 +282,7 @@ describe('bindTabs', function () {
             function goodFuncBoolHook() { bto.addEventHook('show', firstTab, false); }
             function badStringHook()    { bto.addEventHook('show', firstTab, 'foobar'); }
             function badFalseyHook()    { bto.addEventHook('show', firstTab); }
+
             expect(goodFuncHook).to.not.throw(TypeError);
             expect(goodFuncBoolHook).to.not.throw(TypeError);
             expect(badStringHook).to.throw(TypeError);
@@ -325,24 +326,17 @@ describe('bindTabs', function () {
             }
             closeSpy.should.have.been.calledTwice;
         });
-        it('should provide a hook for the showlist event'/*, function (done) {
-            var lastTab = bto.getTabs().last();
-            var lastCntr = bto.pairedTo(lastTab);
-            var closeSpy = sinon.spy(closeHook);
-            var callCount = 0;
+        it('should provide a hook for the showlist event', function (done) {
+            var showlistSpy = sinon.spy(showListHook);
+            bto.addShowlistHook(showlistSpy);
+            bto.tabs.children('.notab').click();
 
-            bto.addCloseHook(lastTab, closeSpy);
-            bto.addCloseHook(lastCntr, closeSpy);
+            showlistSpy.should.have.been.calledOnce;
 
-            lastTab.find('.bt_closeTab').click();
-
-            function closeHook() {
-                if(++callCount === 2) {
-                    done();
-                }
+            function showListHook() {
+                done();
             }
-            closeSpy.should.have.been.calledTwice;
-        }*/);
+        });
     });
 
     describe('API', function () {

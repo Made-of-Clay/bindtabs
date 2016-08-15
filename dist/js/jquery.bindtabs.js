@@ -166,20 +166,17 @@
                 var tab = $this.closest('.bt_tab');
                 if (tab.length === 0) {
                     pairId = $this.closest('.bt_listItem').data('pairid');
-                    tab = plugin.getTabs().filter("[data-pairid=\"" + pairId + "\"]");
+                    tab = plugin.tabs.children("[data-pairid=\"" + pairId + "\"]");
                 }
                 plugin.close(tab);
                 event.stopPropagation();
             }
             function toggleTabList(event) {
-                var targetClasses = $(event.target).attr('class');
-                if (isInString(['notab', 'bt_toggle'], targetClasses)) {
-                    $(event.currentTarget).toggleClass(showClass);
-                }
+                plugin.showList(this);
             }
             function showTabFromTablist(event) {
                 var pairId = $(this).data('pairid');
-                var tab = plugin.getTabs().filter("[data-pairid=\"" + pairId + "\"]");
+                var tab = plugin.tabs.children("[data-pairid=\"" + pairId + "\"]");
                 plugin.show(tab);
             }
         };
@@ -189,7 +186,6 @@
          * @method
          */
         BindTabs.prototype._checkElem = function (elem) {
-            // if(!isString(elem) && typeof elem !== 'object') {
             if (!is('string', elem) && !is('object', elem)) {
                 console.error('You must pass an object or string selector to _checkElem(). This was passed:', elem);
                 return null;
@@ -273,7 +269,7 @@
             if (el.hasClass('bt_tab')) {
                 group = 'containers';
             }
-            else if (el.hasClass('bt_cntr')) {
+            else if (el.hasClass('bt_cntr') || el.hasClass('notab')) {
                 group = 'tabs';
             }
             else {
@@ -327,8 +323,15 @@
             this._addShowClass(tab, cntr);
             // show current tablist item
             this._trigger('show', [tab, cntr]);
-            // tab.trigger('show:bindtabs');
             return tab;
+        };
+        BindTabs.prototype.showList = function (clicked) {
+            var elem = $(clicked);
+            var targetClasses = $(elem).attr('class');
+            if (this._checkEventRegistry('showlist', elem) === false)
+                return;
+            elem.toggleClass(showClass);
+            this._trigger('showlist', [elem]);
         };
         BindTabs.prototype.close = function (srcElem) {
             var tab;
@@ -351,30 +354,33 @@
                 var pairedTabLi = this.tabs.children('.notab').find(".bt_listItem[data-pairid=\"" + pairId + "\"]");
                 $elems = $elems.add(pairedTabLi);
             }
-            // check closable
-            // check event registry
             this._trigger('close', [$elems]);
             $elems.remove();
             this._checkTabDisplay(tab);
             this._trigger('closed', [this.element], { tab: tab, cntr: cntr });
         };
         BindTabs.prototype.addEventHook = function (event, tab, fn) {
-            tab = this._prepTabForHook(tab);
+            var jqTab = (tab instanceof $) ? tab : $(tab);
+            var preppedTab = this._prepTabForHook(jqTab);
             fn = this._prepFnForHook(fn);
-            this._addEventRegistry(event, { tab: tab, fn: fn });
+            this._addEventRegistry(event, { tab: preppedTab, fn: fn });
         };
         BindTabs.prototype.addShowHook = function (tab, func) {
             this.addEventHook('show', tab, func);
+        };
+        BindTabs.prototype.addShowlistHook = function (func) {
+            // get .notab
+            var notab = this.tabs.children('.notab');
+            this.addEventHook('showlist', notab, func);
         };
         BindTabs.prototype.addCloseHook = function (tab, func) {
             this.addEventHook('close', tab, func);
         };
         BindTabs.prototype._prepTabForHook = function (tab) {
-            var checkedEl = this._checkElem(tab);
-            if (checkedEl.hasClass(cntrClass)) {
-                tab = this.pairedTo(checkedEl);
+            if (tab.hasClass(cntrClass)) {
+                tab = this.pairedTo(tab);
             }
-            else if (!checkedEl.hasClass(tabClass)) {
+            else if (!tab.hasClass(tabClass) && !tab.hasClass('notab')) {
                 throw new ReferenceError('Event hook elements must be either a tab or container; none were passed');
             }
             return tab;
@@ -423,9 +429,6 @@
     function isJQuery(toCheck) {
         return toCheck instanceof jQuery;
     }
-    // function isSet(toCheck) {
-    //     return typeof toCheck !== 'undefined';
-    // }
     function isEmpty(mixed_var) {
         var undef, key, i, len;
         var emptyValues = [undef, null, false, 0, '', '0'];
@@ -446,12 +449,6 @@
         type = (type === 'set') ? 'undefined' : type;
         return typeof toCheck === type;
     }
-    // function isString(toCheck) {
-    //     return typeof toCheck === 'string';
-    // }
-    // function isObject(toCheck) {
-    //     return typeof toCheck === 'object';
-    // }
     function isInString(needle, haystack, useAnd) {
         var glue, rxp, pattern;
         useAnd = (typeof useAnd === 'boolean') ? useAnd : false;
@@ -460,9 +457,6 @@
         rxp = new RegExp(pattern);
         return haystack.search(rxp) > -1;
     }
-    // function isBool(toCheck) {
-    //     return typeof toCheck === 'boolean';
-    // }
     $.fn[pluginName] = function (options, retElems) {
         var _this = this;
         if (retElems === void 0) { retElems = false; }
