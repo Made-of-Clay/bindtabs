@@ -30,6 +30,7 @@
     const closableClass = 'bt_closable';
 
     class BindTabs {
+        iid: number = generateUniqInstanceId();
         element: JQuery;
         tabs: JQuery;
         containers: JQuery;
@@ -102,12 +103,16 @@
         }
 
         _addPluginMarkup() {
+            this._addIid();
             this._addPluginClass();
             this._addPluginElClasses();
             this._addTabnameWrapper();
             this._addPairId();
             this._showStartingTab();
             this._checkForTablist();
+        }
+        _addIid() {
+            this.element.data('iid', this.iid);
         }
         _addPluginClass() {
             var plugin = this;
@@ -510,6 +515,20 @@
         pattern = (Array.isArray(needle)) ? needle.join(glue) : needle;
         rxp     = new RegExp(pattern);
         return haystack.search(rxp) > -1;
+    }
+    function generateUniqInstanceId() {
+        var salt = '5137';
+        var tmpId = makeDateId();
+        var insertionPoint = getRandomArbitrary(0, tmpId.length);
+        return parseInt(injectText(salt, tmpId, insertionPoint));
+    }
+    function getRandomArbitrary(min:number, max:number) {
+        return Math.random() * (max - min) + min;
+    }
+    function injectText(needle:string, haystack:string, position:number) {
+        var half1:string = haystack.substr(0, position);
+        var half2:string = haystack.substring(position);
+        return half1 + needle + half2;
     }
 
     $.fn[pluginName] = function(options: Object, retElems: boolean = false) {

@@ -27,6 +27,7 @@
     var closableClass = 'bt_closable';
     var BindTabs = (function () {
         function BindTabs(element, options) {
+            this.iid = generateUniqInstanceId();
             this.pairIds = [];
             this.tabNameWrapMarkup = "<span class=\"" + tabNameWrapClass + "\">";
             this.eventRegistry = {};
@@ -83,12 +84,16 @@
             this._assignRelations('containers', containers);
         };
         BindTabs.prototype._addPluginMarkup = function () {
+            this._addIid();
             this._addPluginClass();
             this._addPluginElClasses();
             this._addTabnameWrapper();
             this._addPairId();
             this._showStartingTab();
             this._checkForTablist();
+        };
+        BindTabs.prototype._addIid = function () {
+            this.element.data('iid', this.iid);
         };
         BindTabs.prototype._addPluginClass = function () {
             var plugin = this;
@@ -456,6 +461,20 @@
         pattern = (Array.isArray(needle)) ? needle.join(glue) : needle;
         rxp = new RegExp(pattern);
         return haystack.search(rxp) > -1;
+    }
+    function generateUniqInstanceId() {
+        var salt = '5137';
+        var tmpId = makeDateId();
+        var insertionPoint = getRandomArbitrary(0, tmpId.length);
+        return parseInt(injectText(salt, tmpId, insertionPoint));
+    }
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+    function injectText(needle, haystack, position) {
+        var half1 = haystack.substr(0, position);
+        var half2 = haystack.substring(position);
+        return half1 + needle + half2;
     }
     $.fn[pluginName] = function (options, retElems) {
         var _this = this;

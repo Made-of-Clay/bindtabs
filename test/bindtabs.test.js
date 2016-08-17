@@ -22,6 +22,14 @@ describe('bindTabs', function () {
             bt.hasClass('bind_tabs').should.be.true;
             bt.children('.bind_tabs').length.should.equal(2);
         });
+        it('should generate an instance id and add it to the bt element', function () {
+            bto = bt.bindTabs()[0];
+            var iid = bt.data('iid');
+
+            expect(bto.iid).to.be.ok;
+            expect(iid).to.be.ok;
+            expect(bto.iid).to.equal(iid);
+        });
         it('should accept data-attr init options', function() {
             var wrapId = 'simple-wrapper';
             bt.attr({
@@ -100,6 +108,11 @@ describe('bindTabs', function () {
             bto.getTabs().each(function (index, elem) {
                 $(elem).children('.tabNameWrap').length.should.be.above(0);
             });
+        });
+        it('should generate an id for the instance and make accessible via API', function () {
+            bto = bt.bindTabs()[0];
+
+            expect(bto.iid).to.be.ok;
         });
     });
 
