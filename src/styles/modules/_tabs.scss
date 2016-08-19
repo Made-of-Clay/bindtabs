@@ -17,6 +17,7 @@
     // margin-left: -0.25em;
     max-width: 400px;
     padding: 0.5em;
+    white-space: nowrap;
 
     .no-flexbox & {
         display: inline-block;
@@ -24,6 +25,14 @@
     }
     @include selection(true) {
         background: transparent;
+    }
+    .bt_tabs_collapsed & {
+        display: none;
+
+        &.is-showing {
+            display: block;
+            width: calc(100% - 40px); // not sure why 40px instead of 25, but oh well
+        }
     }
 }
 
