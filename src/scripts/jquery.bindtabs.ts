@@ -112,7 +112,7 @@
             this._checkForTablist();
         }
         _addIid() {
-            this.element.data('iid', this.iid);
+            this.element.data('btIid', this.iid);
         }
         _addPluginClass() {
             var plugin = this;
@@ -469,6 +469,22 @@
                     }
                 }
             }
+        }
+        destroy() {
+            this._teardown();
+        }
+        _teardown() {
+            this.element.removeClass(pluginClass)
+                .children().removeClass('bt_tabs bt_cntrs '+pluginClass).end()
+                .find('.notab').remove().end()
+                .find('[data-pairId]').removeAttr('data-pairId').end()
+                .find('.'+showClass).removeClass(showClass).end()
+                .find('.'+tabClass).removeClass(tabClass).end()
+                .find('.'+cntrClass).removeClass(cntrClass).end()
+            ;
+            $.each(['mocBindTabs', 'btIid'], (index, key2rm) => {
+                $.removeData(this.element[0], key2rm);
+            });
         }
     }
 

@@ -93,7 +93,7 @@
             this._checkForTablist();
         };
         BindTabs.prototype._addIid = function () {
-            this.element.data('iid', this.iid);
+            this.element.data('btIid', this.iid);
         };
         BindTabs.prototype._addPluginClass = function () {
             var plugin = this;
@@ -419,6 +419,22 @@
                     }
                 }
             }
+        };
+        BindTabs.prototype.destroy = function () {
+            this._teardown();
+        };
+        BindTabs.prototype._teardown = function () {
+            var _this = this;
+            this.element.removeClass(pluginClass)
+                .children().removeClass('bt_tabs bt_cntrs ' + pluginClass).end()
+                .find('.notab').remove().end()
+                .find('[data-pairId]').removeAttr('data-pairId').end()
+                .find('.' + showClass).removeClass(showClass).end()
+                .find('.' + tabClass).removeClass(tabClass).end()
+                .find('.' + cntrClass).removeClass(cntrClass).end();
+            $.each(['mocBindTabs', 'btIid'], function (index, key2rm) {
+                $.removeData(_this.element[0], key2rm);
+            });
         };
         return BindTabs;
     }());

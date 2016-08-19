@@ -24,7 +24,7 @@ describe('bindTabs', function () {
         });
         it('should generate an instance id and add it to the bt element', function () {
             bto = bt.bindTabs()[0];
-            var iid = bt.data('iid');
+            var iid = bt.data('btIid');
 
             expect(bto.iid).to.be.ok;
             expect(iid).to.be.ok;
@@ -171,7 +171,6 @@ describe('bindTabs', function () {
             bto.getTabs().length.should.equal(tabCount-1);
             bto.getContainers().length.should.equal(cntrCount-1);
         });
-        it('should hide tabs behind a toggle-able dropdown once the space for tabs runs out');
         it('should show the tablist when the tablist icon is clicked', function () {
             bto = bt.bindTabs()[0];
             var notab = bto.tabs.find('.notab');
@@ -388,6 +387,29 @@ describe('bindTabs', function () {
             bto.close(firstTab);
             bto.getTabs().first().data('pairid').should.equal(firstTabPairId);
             console.groupEnd();
+        });
+        it('should expose destroy method which unsets plugin stuff', function() {
+            bto.destroy();
+            var hasTabsClass = bt.children('.bt_tabs').length > 0;
+            var hasCntrsClass = bt.children('.bt_cntrs').length > 0;
+            var eachTabHasClass = bt.find('.bt_tab').length > 0;
+            var eachCntrHasClass = bt.find('.bt_cntr').length > 0;
+            var hasPluginClass = bt.hasClass('bind_tabs');
+            var containsPairedElems = bt.find('[data-pairid]').length > 0;
+            var containsPluginClasses = bt.find('.bind_tabs').length > 0;
+            var hasNotabElem = bt.find('.notab').length > 0;
+            var hasBtInstance = bt.data('mocBindTabs');
+            var hasBtIid = bt.data('btIid');
+
+            expect(hasPluginClass).to.be.false;
+            expect(containsPluginClasses).to.be.false;
+            expect(containsPairedElems).to.be.false;
+            expect(hasTabsClass).to.be.false;
+            expect(hasCntrsClass).to.be.false;
+            expect(eachTabHasClass).to.be.false;
+            expect(eachCntrHasClass).to.be.false;
+            expect(hasNotabElem).to.be.false;
+            expect(hasBtInstance).to.not.be.ok;
         });
     });
 });
