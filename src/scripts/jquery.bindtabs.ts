@@ -470,6 +470,9 @@
                 }
             }
         }
+
+        // dynamicTabGen() {}
+
         destroy() {
             this._teardown();
         }

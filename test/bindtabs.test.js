@@ -411,6 +411,16 @@ describe('bindTabs', function () {
             expect(hasNotabElem).to.be.false;
             expect(hasBtInstance).to.not.be.ok;
         });
+
+        describe('dynamicTabGen() method', function () {
+            it('should be exposed');
+            it('should allow custom id creation');
+            it('should allow tab|cntr class customization');
+            it('should allow custom placement in the (DOM) order of tabs');
+            it('should allow asyncronous content loading into containers');
+            it('should be able to flag new tab as disabled');
+            // it('________');
+        });
     });
 });
 

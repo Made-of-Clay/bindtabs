@@ -420,6 +420,7 @@
                 }
             }
         };
+        // dynamicTabGen() {}
         BindTabs.prototype.destroy = function () {
             this._teardown();
         };
