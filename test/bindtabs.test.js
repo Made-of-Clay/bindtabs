@@ -235,7 +235,7 @@ describe('bindTabs', function () {
 
             tabs.on('show:bindtabs', showSpy);
             tabs.last().click();
-
+noRemove(bt);
             function btShown(event) {
                 done();
             }
