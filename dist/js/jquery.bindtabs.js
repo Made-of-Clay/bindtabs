@@ -1,40 +1,51 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/// <reference path="./dynamictabgen-options.d.ts" />
+/// <reference path="./dynamictabgen-init-opts.d.ts" />
 "use strict";
+var NEWTAB_PLACEHOLDER = 'New Tab';
+var DEFAULT_TABNAME = "<em>" + NEWTAB_PLACEHOLDER + "</em>";
 var DynamicTabGen = (function () {
-    function DynamicTabGen() {
-        this.foo = 'bar';
+    function DynamicTabGen(options) {
+        this._setNewConsts(options);
     }
-    DynamicTabGen.prototype.showFoo = function () {
-        console.log(this.foo);
+    DynamicTabGen.prototype._setNewConsts = function (_a) {
+        var tabClass = _a.tabClass, cntrClass = _a.cntrClass;
+        var TAB_CLASS = tabClass;
+        var CNTR_CLASS = cntrClass;
     };
     return DynamicTabGen;
 }());
 exports.DynamicTabGen = DynamicTabGen;
+/*
+all new tabs need at LEAST the following:
+- tab name (defaults to New Tab)
+- tab class *
+- container class *
+        * will always min have "bt-tab" & "bt-cntr"
+- pairid (generated from BindTabs object?)
+*/ 
 
 },{}],2:[function(require,module,exports){
 /// <reference path="./jquery.d.ts" />
 /// <reference path="./bindtabs-options.d.ts" />
+/// <reference path="./dynamictabgen-init-opts.d.ts" />
 /// <reference path="./bindtabs-event-registry-object.d.ts" />
 "use strict";
-/*
-    Custom Events:
-    - shown
-    - closed
- */
+var bindtabs_dynamictabgen_ts_1 = require('./bindtabs-dynamictabgen.ts');
 var pluginName = 'bindTabs', pluginNs = 'moc';
 var defaults = {
     closable: false,
     tablist: true
 };
+var tabgen;
 /*
 possible additions:
 - callbacks before major events (show, close, load, ...)
     -> these are in contrast to events fired after actions finish (show, closed, loaded, ...)
  */
-var bindtabs_dynamictabgen_ts_1 = require('./bindtabs-dynamictabgen.ts');
 var pluginClass = 'bind_tabs';
-var tabClass = 'bt_tab';
-var cntrClass = 'bt_cntr';
+var TAB_CLASS = 'bt_tab';
+var CNTR_CLASS = 'bt_cntr';
 var showClass = 'is-showing';
 var tabNameWrapClass = 'tabNameWrap';
 var closeIconClass = 'bt_closeTab';
@@ -49,6 +60,7 @@ var BindTabs = (function () {
         this.options = $.extend({}, defaults, options);
         this._name = pluginName;
         this._defaults = defaults;
+        this._initDynTabGen();
         this._create();
         return this;
     }
@@ -120,8 +132,8 @@ var BindTabs = (function () {
         this.element.addClass('bt_wrapper');
         this.tabs.addClass('bt_tabs');
         this.containers.addClass('bt_containers');
-        addClassToEach(tabClass, this.tabs.children());
-        addClassToEach(cntrClass, this.containers.children());
+        addClassToEach(TAB_CLASS, this.tabs.children());
+        addClassToEach(CNTR_CLASS, this.containers.children());
     };
     BindTabs.prototype._addTabnameWrapper = function () {
         var closeMarkup = $('<span>', {
@@ -396,10 +408,10 @@ var BindTabs = (function () {
         this.addEventHook('close', tab, func);
     };
     BindTabs.prototype._prepTabForHook = function (tab) {
-        if (tab.hasClass(cntrClass)) {
+        if (tab.hasClass(CNTR_CLASS)) {
             tab = this.pairedTo(tab);
         }
-        else if (!tab.hasClass(tabClass) && !tab.hasClass('notab')) {
+        else if (!tab.hasClass(TAB_CLASS) && !tab.hasClass('notab')) {
             throw new ReferenceError('Event hook elements must be either a tab or container; none were passed');
         }
         return tab;
@@ -434,9 +446,28 @@ var BindTabs = (function () {
             }
         }
     };
-    BindTabs.prototype.dynamicTabGen = function () {
-        var tabgen = new bindtabs_dynamictabgen_ts_1.DynamicTabGen();
-        tabgen.showFoo();
+    BindTabs.prototype._initDynTabGen = function () {
+        // var pairId: string = this._makeNewPairId();
+        var initOpts = {
+            tabClass: TAB_CLASS,
+            cntrClass: CNTR_CLASS
+        };
+        tabgen = new bindtabs_dynamictabgen_ts_1.DynamicTabGen(initOpts);
+    };
+    BindTabs.prototype.dynamicTabGen = function (opts /*, custId?:string*/) {
+        //         var dynOpts: DynTabGenOptions = {};
+        //         // var tabgen = new DynamicTabGen();
+        //         // tabgen.showFoo();
+        //         if(is('object', opts)) {
+        //             $.extend(dynOpts, opts);
+        //         } else if(is('string', opts)) {
+        //             dynOpts.newTabName = opts;
+        //         }
+        //         // if(is('string', custId)) {
+        //         //     dynOpts.custId = 
+        //         // }
+        //         var tabgen = new DynamicTabGen(dynOpts);
+        // console.log('tabgen', tabgen);
     };
     BindTabs.prototype.destroy = function () {
         this._teardown();
@@ -448,8 +479,8 @@ var BindTabs = (function () {
             .find('.notab').remove().end()
             .find('[data-pairId]').removeAttr('data-pairId').end()
             .find('.' + showClass).removeClass(showClass).end()
-            .find('.' + tabClass).removeClass(tabClass).end()
-            .find('.' + cntrClass).removeClass(cntrClass).end();
+            .find('.' + TAB_CLASS).removeClass(TAB_CLASS).end()
+            .find('.' + CNTR_CLASS).removeClass(CNTR_CLASS).end();
         $.each(['mocBindTabs', 'btIid'], function (index, key2rm) {
             $.removeData(_this.element[0], key2rm);
         });

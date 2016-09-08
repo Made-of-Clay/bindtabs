@@ -1,18 +1,17 @@
 /// <reference path="./jquery.d.ts" />
 /// <reference path="./bindtabs-options.d.ts" />
+/// <reference path="./dynamictabgen-init-opts.d.ts" />
 /// <reference path="./bindtabs-event-registry-object.d.ts" />
 
-/*
-    Custom Events:
-    - shown
-    - closed
- */
+import {DynamicTabGen} from './bindtabs-dynamictabgen.ts';
+
 var pluginName: string = 'bindTabs',
     pluginNs: string = 'moc';
 var defaults = {
     closable: false,
     tablist: true
 };
+var tabgen: DynamicTabGen;
 
 /*
 possible additions:
@@ -20,11 +19,9 @@ possible additions:
     -> these are in contrast to events fired after actions finish (show, closed, loaded, ...)
  */
 
-import {DynamicTabGen} from './bindtabs-dynamictabgen.ts';
-
 const pluginClass = 'bind_tabs';
-const tabClass = 'bt_tab';
-const cntrClass = 'bt_cntr';
+const TAB_CLASS = 'bt_tab';
+const CNTR_CLASS = 'bt_cntr';
 const showClass = 'is-showing';
 const tabNameWrapClass = 'tabNameWrap';
 const closeIconClass = 'bt_closeTab';
@@ -50,6 +47,7 @@ class BindTabs {
         this.options = $.extend({}, defaults, options) as BtOptions;
         this._name = pluginName;
         this._defaults = defaults;
+        this._initDynTabGen();
         this._create();
         return this;
     }
@@ -128,8 +126,8 @@ class BindTabs {
         this.tabs.addClass('bt_tabs');
         this.containers.addClass('bt_containers');
 
-        addClassToEach(tabClass, this.tabs.children());
-        addClassToEach(cntrClass, this.containers.children());
+        addClassToEach(TAB_CLASS, this.tabs.children());
+        addClassToEach(CNTR_CLASS, this.containers.children());
     }
     _addTabnameWrapper() {
         var closeMarkup = $('<span>', {
@@ -433,9 +431,9 @@ class BindTabs {
         this.addEventHook('close', tab, func);
     }
     _prepTabForHook(tab:JQuery) {
-        if(tab.hasClass(cntrClass)) {
+        if(tab.hasClass(CNTR_CLASS)) {
             tab = this.pairedTo(tab);
-        } else if(!tab.hasClass(tabClass) && !tab.hasClass('notab')) {
+        } else if(!tab.hasClass(TAB_CLASS) && !tab.hasClass('notab')) {
             throw new ReferenceError('Event hook elements must be either a tab or container; none were passed');
         }
         return tab;
@@ -472,9 +470,29 @@ class BindTabs {
         }
     }
 
-    dynamicTabGen() {
-        var tabgen = new DynamicTabGen();
-        tabgen.showFoo();
+    _initDynTabGen() {
+        // var pairId: string = this._makeNewPairId();
+        var initOpts: DynTabGenInitOpts = {
+            tabClass: TAB_CLASS,
+            cntrClass: CNTR_CLASS
+        };
+        tabgen = new DynamicTabGen(initOpts);
+    }
+
+    dynamicTabGen(opts?/*, custId?:string*/) {
+//         var dynOpts: DynTabGenOptions = {};
+//         // var tabgen = new DynamicTabGen();
+//         // tabgen.showFoo();
+//         if(is('object', opts)) {
+//             $.extend(dynOpts, opts);
+//         } else if(is('string', opts)) {
+//             dynOpts.newTabName = opts;
+//         }
+//         // if(is('string', custId)) {
+//         //     dynOpts.custId = 
+//         // }
+//         var tabgen = new DynamicTabGen(dynOpts);
+// console.log('tabgen', tabgen);
     }
 
     destroy() {
@@ -486,8 +504,8 @@ class BindTabs {
             .find('.notab').remove().end()
             .find('[data-pairId]').removeAttr('data-pairId').end()
             .find('.'+showClass).removeClass(showClass).end()
-            .find('.'+tabClass).removeClass(tabClass).end()
-            .find('.'+cntrClass).removeClass(cntrClass).end()
+            .find('.'+TAB_CLASS).removeClass(TAB_CLASS).end()
+            .find('.'+CNTR_CLASS).removeClass(CNTR_CLASS).end()
         ;
         $.each(['mocBindTabs', 'btIid'], (index, key2rm) => {
             $.removeData(this.element[0], key2rm);

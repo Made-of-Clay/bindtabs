@@ -235,7 +235,7 @@ describe('bindTabs', function () {
 
             tabs.on('show:bindtabs', showSpy);
             tabs.last().click();
-noRemove(bt);
+
             function btShown(event) {
                 done();
             }
@@ -413,7 +413,18 @@ noRemove(bt);
         });
 
         describe('dynamicTabGen() method', function () {
-            it('should be exposed');
+            it('should be exposed', function () {
+                var dynTabGenIsFunc = $.isFunction(bto.dynamicTabGen);
+                expect(bto.dynamicTabGen).to.be.ok;
+                expect(dynTabGenIsFunc).to.be.true;
+            });
+            it('should create tab/cntr when called', function () {
+                var countBeforeGen = bto.getTabs().length;
+                bto.dynamicTabGen();
+console.log('bto.dynamicTabGen', bto.dynamicTabGen);
+noRemove(bt);
+                expect(bto.getTabs()).to.have.lengthOf(countBeforeGen+1);
+            });
             it('should allow custom id creation');
             it('should allow tab|cntr class customization');
             it('should allow custom placement in the (DOM) order of tabs');
