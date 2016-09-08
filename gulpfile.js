@@ -1,6 +1,8 @@
 var watchify = require('watchify');
 var browserify = require('browserify');
 var gulp = require('gulp');
+var sass = require('gulp-sass');
+var rename = require('gulp-rename');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var gutil = require('gulp-util');
@@ -37,3 +39,24 @@ function bundle() {
         .pipe(sourcemaps.write('./')) // writes .map file
         .pipe(gulp.dest('./dist/js'));
 }
+
+var sassSrc = './src/styles/**/*.scss';
+gulp.task('sass', function() {
+    var sassOptions = {
+        outputStyle: 'expanded',
+        sourceMap: true
+    };
+    return gulp
+        .src(sassSrc)
+        .pipe(sourcemaps.init())
+            .pipe(sass(sassOptions).on('error', sass.logError))
+        .pipe(rename('jquery.bindtabs.css'))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest('./dist/css'));
+});
+
+gulp.task('watch', function() {
+    gulp.watch(sassSrc, ['sass']);
+});
+
+gulp.task('default', ['js', 'sass', 'watch']);
