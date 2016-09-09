@@ -1,6 +1,7 @@
 /// <reference path="./jquery.d.ts" />
 interface DynTabGenOptions {
-    newTabName?: 'string',
+    tabName?: string,
+    pairid: number
     // custId?: 'string',
     // tabClass?: 'string',
     // cntrClass?: 'string',

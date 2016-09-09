@@ -418,14 +418,43 @@ describe('bindTabs', function () {
                 expect(bto.dynamicTabGen).to.be.ok;
                 expect(dynTabGenIsFunc).to.be.true;
             });
-            it('should create tab/cntr when called', function () {
+            it('should create tab/cntr[/tablistItem] when called', function () {
                 var countBeforeGen = bto.getTabs().length;
                 bto.dynamicTabGen();
-console.log('bto.dynamicTabGen', bto.dynamicTabGen);
-noRemove(bt);
+                var dynClass = 'bt_dynamic';
+
+                var newestTab = bto.getTabs().last();
+                var newestTabIsDynamic = newestTab.hasClass(dynClass);
+                var newestTabIsTab = newestTab.hasClass('bt_tab');
+
+                var newestCntr = bto.getContainers().last();
+                var newestCntrIsDynamic = newestCntr.hasClass(dynClass);
+                var newestTabIsCntr = newestCntr.hasClass('bt_cntr');
+
                 expect(bto.getTabs()).to.have.lengthOf(countBeforeGen+1);
+                newestTabIsDynamic.should.be.true;
+                newestCntrIsDynamic.should.be.true;
+                newestTabIsTab.should.be.true;
+                newestTabIsCntr.should.be.true;
             });
-            it('should allow custom id creation');
+            it('should always have a tabname', function () {
+noRemove(bt);
+                bto.dynamicTabGen();
+                var newTab1 = bto.getTabs().last();
+                var tab1name = newTab1.children('.tabNameWrap').text();
+
+                var newTab2Name = 'My Tab';
+                bto.dynamicTabGen({ tabName: newTab2Name });
+                var newTab2 = bto.getTabs().last();
+                var tab2name = newTab2.children('.tabNameWrap').text();
+
+                tab1name.should.equal('New Tab');
+                tab2name.should.equal(newTab2Name);
+            });
+            it('should allow custom id creation'/*, function () {
+                var opts = {};
+                bto.dynamicTabGen();
+            }*/);
             it('should allow tab|cntr class customization');
             it('should allow custom placement in the (DOM) order of tabs');
             it('should allow asyncronous content loading into containers');

@@ -21,6 +21,7 @@ possible additions:
 
 const pluginClass = 'bind_tabs';
 const TAB_CLASS = 'bt_tab';
+const TABLI_CLASS = 'bt_listItem';
 const CNTR_CLASS = 'bt_cntr';
 const showClass = 'is-showing';
 const tabNameWrapClass = 'tabNameWrap';
@@ -255,18 +256,6 @@ class BindTabs {
         return elements;
     }
 
-    _disabled(tab: JQuery) {
-        return tab.hasClass('is-disabled');
-    }
-
-    _showing(tab:JQuery) {
-        var showSelector = '.'+showClass;
-        var showingTab = this.tabs.children(showSelector);
-
-        if(showingTab.length === 0) return false;
-        return (tab.data('pairid') === showingTab.data('pairid'));
-    }
-
     _removeShowClass(tab:JQuery = $(), container:JQuery = $()) {
         var showSelector = '.'+showClass;
         var elements = $();
@@ -353,6 +342,9 @@ class BindTabs {
     getContainers() {
         return this.containers.children('.bt_cntr');
     }
+    getTabListItems() {
+        return this.tabs.find('.'+TABLI_CLASS);
+    }
 
     show(srcElem: JQuery | string | HTMLElement) {
         var tab: JQuery, cntr: JQuery;
@@ -372,6 +364,16 @@ class BindTabs {
         // show current tablist item
         this._trigger('show', [tab, cntr]);
         return tab;
+    }
+    _showing(tab:JQuery) {
+        var showSelector = '.'+showClass;
+        var showingTab = this.tabs.children(showSelector);
+
+        if(showingTab.length === 0) return false;
+        return (tab.data('pairid') === showingTab.data('pairid'));
+    }
+    _disabled(tab: JQuery) {
+        return tab.hasClass('is-disabled');
     }
 
     showList(clicked : HTMLElement|JQuery) {
@@ -474,25 +476,31 @@ class BindTabs {
         // var pairId: string = this._makeNewPairId();
         var initOpts: DynTabGenInitOpts = {
             tabClass: TAB_CLASS,
+            tabLiClass: TABLI_CLASS,
+            tabNameWrapClass: tabNameWrapClass,
             cntrClass: CNTR_CLASS
         };
         tabgen = new DynamicTabGen(initOpts);
     }
 
     dynamicTabGen(opts?/*, custId?:string*/) {
-//         var dynOpts: DynTabGenOptions = {};
-//         // var tabgen = new DynamicTabGen();
-//         // tabgen.showFoo();
-//         if(is('object', opts)) {
-//             $.extend(dynOpts, opts);
-//         } else if(is('string', opts)) {
-//             dynOpts.newTabName = opts;
-//         }
-//         // if(is('string', custId)) {
-//         //     dynOpts.custId = 
-//         // }
-//         var tabgen = new DynamicTabGen(dynOpts);
-// console.log('tabgen', tabgen);
+        var dynOpts: DynTabGenOptions = {
+            pairid: generateUniqInstanceId()
+        };
+        if(is('object', opts)) {
+            $.extend(dynOpts, opts);
+        } else if(is('string', opts)) {
+            dynOpts.tabName = opts;
+        }
+        // if(is('string', custId)) {
+        //     dynOpts.custId = 
+        // }
+        var elems = tabgen.newTab(dynOpts);
+        this.getTabs().last().after(elems.tab);
+        this.getTabListItems().last().after(elems.tabLi);
+        this.getContainers().last().after(elems.cntr);
+        this.show(elems.tab);
+        return elems.cntr;
     }
 
     destroy() {
