@@ -2,7 +2,7 @@
 interface DynTabGenOptions {
     tabName?: string,
     pairid: number
-    // custId?: 'string',
-    // tabClass?: 'string',
-    // cntrClass?: 'string',
+    custId?: string,
+    // tabClass?: string,
+    // cntrClass?: string,
 }

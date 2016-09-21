@@ -438,7 +438,6 @@ describe('bindTabs', function () {
                 newestTabIsCntr.should.be.true;
             });
             it('should always have a tabname', function () {
-noRemove(bt);
                 bto.dynamicTabGen();
                 var newTab1 = bto.getTabs().last();
                 var tab1name = newTab1.children('.tabNameWrap').text();
@@ -451,10 +450,28 @@ noRemove(bt);
                 tab1name.should.equal('New Tab');
                 tab2name.should.equal(newTab2Name);
             });
-            it('should allow custom id creation'/*, function () {
-                var opts = {};
-                bto.dynamicTabGen();
-            }*/);
+            it('should allow custom id creation', function () {
+                var custId = 'testington';
+                var opts = {
+                    tabName: 'Tab w/ custom id',
+                    custId: custId
+                };
+                bto.dynamicTabGen(opts);
+                var newTab = bto.getTabs().filter('.bt_dynamic');
+                var customId = newTab.data('custid');
+                expect(customId).to.equal(custId);
+            });
+            it('should support second param custId for legacy support', function () {
+                var custId = 'testington';
+                var tabname = 'Testington Tab';
+                bto.dynamicTabGen(tabname, custId);
+                var newTab = bto.getTabs().filter('.bt_dynamic');
+                var newTabName = getTabName(newTab);
+                var newTabCustId = newTab.data('custid');
+
+                expect(newTabName).to.equal(tabname);
+                expect(newTabCustId).to.equal(custId);
+            });
             it('should allow tab|cntr class customization');
             it('should allow custom placement in the (DOM) order of tabs');
             it('should allow asyncronous content loading into containers');
@@ -500,4 +517,7 @@ function isShowing(container) {
         container = $(container);
     }
     return container.hasClass(showClass);
+}
+function getTabName($tab) {
+    return $tab.children('.tabNameWrap').text();
 }

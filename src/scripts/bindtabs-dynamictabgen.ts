@@ -24,9 +24,10 @@ export class DynamicTabGen {
     }
 
     newTab(options: DynTabGenOptions) {
-        var newTab: JQuery = this._buildNewTab(options);
+        var checkedOpts: DynTabGenOptions = this._checkCustIdVariations(options);
+        var newTab: JQuery = this._buildNewTab(checkedOpts);
         var newTabLi: JQuery = this._buildNewTabLi(newTab);
-        var newCntr: JQuery = this._buildNewCntr(options);
+        var newCntr: JQuery = this._buildNewCntr(checkedOpts);
         return {
             tab: newTab,
             tabLi: newTabLi,
@@ -41,6 +42,7 @@ export class DynamicTabGen {
         var newTabAtts = {
             class: `${TAB_CLASS} ${DYN_CLASS}`,
             'data-pairid': options.pairid,
+            'data-custid': options.custId,
             title: options.tabName
         };
         var newTab: JQuery = $('<li>', newTabAtts).append(tabNameWrap);
@@ -59,6 +61,16 @@ export class DynamicTabGen {
         };
         var newCntr: JQuery = $('<div>', newCntrAtts);
         return newCntr;
+    }
+    _checkCustIdVariations(options: DynTabGenOptions): DynTabGenOptions {
+        if(!options.hasOwnProperty('custId')) {
+            ['custid','custID'].forEach(key => {
+                if(options.hasOwnProperty(key)) {
+                    options.custId = key;
+                }
+            });
+        }
+        return options;
     }
 }
 

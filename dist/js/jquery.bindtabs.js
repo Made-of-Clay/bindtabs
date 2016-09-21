@@ -21,9 +21,10 @@ var DynamicTabGen = (function () {
         CNTR_CLASS = conf.cntrClass;
     };
     DynamicTabGen.prototype.newTab = function (options) {
-        var newTab = this._buildNewTab(options);
+        var checkedOpts = this._checkCustIdVariations(options);
+        var newTab = this._buildNewTab(checkedOpts);
         var newTabLi = this._buildNewTabLi(newTab);
-        var newCntr = this._buildNewCntr(options);
+        var newCntr = this._buildNewCntr(checkedOpts);
         return {
             tab: newTab,
             tabLi: newTabLi,
@@ -38,6 +39,7 @@ var DynamicTabGen = (function () {
         var newTabAtts = {
             class: TAB_CLASS + " " + DYN_CLASS,
             'data-pairid': options.pairid,
+            'data-custid': options.custId,
             title: options.tabName
         };
         var newTab = $('<li>', newTabAtts).append(tabNameWrap);
@@ -55,6 +57,16 @@ var DynamicTabGen = (function () {
         };
         var newCntr = $('<div>', newCntrAtts);
         return newCntr;
+    };
+    DynamicTabGen.prototype._checkCustIdVariations = function (options) {
+        if (!options.hasOwnProperty('custId')) {
+            ['custid', 'custID'].forEach(function (key) {
+                if (options.hasOwnProperty(key)) {
+                    options.custId = key;
+                }
+            });
+        }
+        return options;
     };
     return DynamicTabGen;
 }());
@@ -75,12 +87,14 @@ all new tabs need at LEAST the following:
 /// <reference path="./bindtabs-event-registry-object.d.ts" />
 "use strict";
 var bindtabs_dynamictabgen_ts_1 = require('./bindtabs-dynamictabgen.ts');
-var pluginName = 'bindTabs', pluginNs = 'moc';
+var pluginName = 'bindTabs';
+var pluginNs = 'moc';
 var defaults = {
     closable: false,
     tablist: true
 };
 var tabgen;
+var consoleStyles = ['BindTabs', 'font-weight:bold'];
 /*
 possible additions:
 - callbacks before major events (show, close, load, ...)
@@ -503,7 +517,7 @@ var BindTabs = (function () {
         };
         tabgen = new bindtabs_dynamictabgen_ts_1.DynamicTabGen(initOpts);
     };
-    BindTabs.prototype.dynamicTabGen = function (opts /*, custId?:string*/) {
+    BindTabs.prototype.dynamicTabGen = function (opts, custId) {
         var dynOpts = {
             pairid: generateUniqInstanceId()
         };
@@ -513,9 +527,10 @@ var BindTabs = (function () {
         else if (is('string', opts)) {
             dynOpts.tabName = opts;
         }
-        // if(is('string', custId)) {
-        //     dynOpts.custId = 
-        // }
+        if (is('string', custId)) {
+            console.warn('%cBindTabs:', 'font-weight:bold', '2nd param of .dynamicTabGen() deprecated; please pass custId as init object property');
+            dynOpts.custId = custId;
+        }
         var elems = tabgen.newTab(dynOpts);
         this.getTabs().last().after(elems.tab);
         this.getTabListItems().last().after(elems.tabLi);

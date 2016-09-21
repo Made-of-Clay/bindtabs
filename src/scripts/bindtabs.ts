@@ -5,13 +5,15 @@
 
 import {DynamicTabGen} from './bindtabs-dynamictabgen.ts';
 
-var pluginName: string = 'bindTabs',
-    pluginNs: string = 'moc';
+const pluginName: string = 'bindTabs';
+const pluginNs: string = 'moc';
 var defaults = {
     closable: false,
     tablist: true
 };
 var tabgen: DynamicTabGen;
+
+const consoleStyles = ['BindTabs', 'font-weight:bold'];
 
 /*
 possible additions:
@@ -483,7 +485,7 @@ class BindTabs {
         tabgen = new DynamicTabGen(initOpts);
     }
 
-    dynamicTabGen(opts?/*, custId?:string*/) {
+    dynamicTabGen(opts?, custId?:string) {
         var dynOpts: DynTabGenOptions = {
             pairid: generateUniqInstanceId()
         };
@@ -492,9 +494,10 @@ class BindTabs {
         } else if(is('string', opts)) {
             dynOpts.tabName = opts;
         }
-        // if(is('string', custId)) {
-        //     dynOpts.custId = 
-        // }
+        if(is('string', custId)) {
+            console.warn('%cBindTabs:', 'font-weight:bold', '2nd param of .dynamicTabGen() deprecated; please pass custId as init object property');
+            dynOpts.custId = custId;
+        }
         var elems = tabgen.newTab(dynOpts);
         this.getTabs().last().after(elems.tab);
         this.getTabListItems().last().after(elems.tabLi);
