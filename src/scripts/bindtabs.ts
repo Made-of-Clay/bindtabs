@@ -66,25 +66,25 @@ class BindTabs {
     _checkOptions() {
         var opts = this.options;
 
-        if(!isEmpty(opts.tabs) && !isEmpty(opts.containers)) {
+        if (!isEmpty(opts.tabs) && !isEmpty(opts.containers)) {
             this._assignRelations('tabs', opts.tabs);
             this._assignRelations('containers', opts.containers);
         } else {
             this._checkMarkupForElems();
         }
 
-        if(!is('boolean', opts.tablist)) {
+        if (!is('boolean', opts.tablist)) {
             opts.tablist = true;
         }
     }
     _assignRelations(prop, elem) {
         var plugin = this;
 
-        if(isJQuery(elem) && elem.length > 0) {
+        if (isJQuery(elem) && elem.length > 0) {
             plugin[prop] = elem;
         } else {
             var findTabs = plugin.element.find(elem).not(`.${pluginClass}`);
-            if(findTabs.length > 0) {
+            if (findTabs.length > 0) {
                 plugin[prop] = findTabs;
             }
         }
@@ -93,7 +93,7 @@ class BindTabs {
         var dataAtts = this.element.data();
         var tabs, containers;
 
-        if(!isEmpty(dataAtts.boundtabs) && !isEmpty(dataAtts.boundcontainers)) {
+        if (!isEmpty(dataAtts.boundtabs) && !isEmpty(dataAtts.boundcontainers)) {
             tabs = `.${dataAtts.boundtabs}`;
             containers = `.${dataAtts.boundcontainers}`;
         } else {
@@ -140,7 +140,7 @@ class BindTabs {
         var tabs = this.tabs.children('.bt_tab');
         tabs.wrapInner(this.tabNameWrapMarkup);
 
-        if(this.options.closable) {
+        if (this.options.closable) {
             tabs.addClass(closableClass).append((closeMarkup));
         }
     }
@@ -169,7 +169,7 @@ class BindTabs {
     }
 
     _checkForTablist() {
-        if(this.options.tablist) {
+        if (this.options.tablist) {
             var tabsWithoutList = this.tabs.html();
             var tabListBtn = $('<li>', { class:'notab' }).appendTo(this.tabs);
             var tabListToggle = $('<span>', { class:'bt_toggle' }).appendTo(tabListBtn)
@@ -193,7 +193,7 @@ class BindTabs {
             .on('click', '.bt_closeTab', closeClkdPair)
         ;
 
-        if(plugin.options.tablist) {
+        if (plugin.options.tablist) {
             plugin.tabs
                 .on('click', '.notab', toggleTabList)
                 .on('click', '.bt_listItem', showTabFromTablist)
@@ -204,7 +204,7 @@ class BindTabs {
             var pairId;
             var $this = $(this);
             var tab:JQuery = $this.closest('.bt_tab');
-            if(tab.length === 0) {
+            if (tab.length === 0) {
                 pairId = $this.closest('.bt_listItem').data('pairid');
                 tab = plugin.tabs.children(`[data-pairid="${pairId}"]`)
             }
@@ -227,11 +227,11 @@ class BindTabs {
      * @method
      */
     _checkElem(elem) {
-        if(!is('string', elem) && !is('object', elem)) {
+        if (!is('string', elem) && !is('object', elem)) {
             console.error('You must pass an object or string selector to _checkElem(). This was passed:',elem);
             return null;
         }
-        if(elem.length === 0) {
+        if (elem.length === 0) {
             console.warn('The element you passed to _checkElem() was empty:', elem);
             console.trace('Empty _checkElem()');
             return null;
@@ -249,13 +249,13 @@ class BindTabs {
             cntr: null
         };
 
-        if(isEmpty(elem)) {
+        if (isEmpty(elem)) {
             elements.tab = this.getCurTab();
             elements.cntr = this.getCurCntr();
-        } else if(elem.hasClass('bt_cntr')) {
+        } else if (elem.hasClass('bt_cntr')) {
             elements.tab = this.pairedTo(elem);
             elements.cntr = elem;
-        } else if(elem.hasClass('bt_tab')) {
+        } else if (elem.hasClass('bt_tab')) {
             elements.tab = elem;
             elements.cntr = this.pairedTo(elem);
         }
@@ -267,12 +267,12 @@ class BindTabs {
         var showSelector = '.'+showClass;
         var elements = $();
 
-        if(isEmpty(tab.length)) {
+        if (isEmpty(tab.length)) {
             tab = tab.add(this.tabs.children('.'+showClass));
         }
         elements = elements.add(tab);
 
-        if(isEmpty(container.length)) {
+        if (isEmpty(container.length)) {
             container = this.containers.children('.'+showClass);
         }
         elements = elements.add(container);
@@ -294,7 +294,7 @@ class BindTabs {
 
     _checkTabDisplay(tab: JQuery | HTMLElement) {
         var $tab: JQuery = this._checkElem(tab);
-        if($tab.hasClass(showClass)) {
+        if ($tab.hasClass(showClass)) {
             this.show(this.getTabs().first()); // show first tab when closing showing tab
         }
     }
@@ -304,9 +304,9 @@ class BindTabs {
         var el: any = this._checkElem(elem);
         if (el === null) return;
 
-        if(el.hasClass('bt_tab')) {
+        if (el.hasClass('bt_tab')) {
             group = 'containers';
-        } else if(el.hasClass('bt_cntr') || el.hasClass('notab')) {
+        } else if (el.hasClass('bt_cntr') || el.hasClass('notab')) {
             group = 'tabs';
         } else {
             console.error('Something went wrong; passed element does not have the right class:', el);
@@ -356,13 +356,13 @@ class BindTabs {
     show(srcElem: JQuery | string | HTMLElement) {
         var tab: JQuery, cntr: JQuery;
         var elem = this._checkElem(srcElem);
-        if(elem === null) return;
+        if (elem === null) return;
 
         var elems = this._assignElems(elem);
         tab = elems.tab;
         cntr = elems.cntr;
 
-        if(this._showing(tab)  ||
+        if (this._showing(tab)  ||
            this._disabled(tab) ||
            this._checkEventRegistry('show', tab) === false) return;
 
@@ -376,7 +376,7 @@ class BindTabs {
         var showSelector = '.'+showClass;
         var showingTab = this.tabs.children(showSelector);
 
-        if(showingTab.length === 0) return false;
+        if (showingTab.length === 0) return false;
         return (tab.data('pairid') === showingTab.data('pairid'));
     }
     _disabled(tab: JQuery) {
@@ -386,7 +386,7 @@ class BindTabs {
     showList(clicked : HTMLElement|JQuery) {
         var elem:JQuery = $(clicked); 
         var targetClasses:string = $(elem).attr('class');
-        if(this._checkEventRegistry('showlist', elem) === false) return;
+        if (this._checkEventRegistry('showlist', elem) === false) return;
         elem.toggleClass(showClass);
         this._trigger('showlist', [elem]);
     }
@@ -399,18 +399,18 @@ class BindTabs {
         tab = elements.tab;
         cntr = elements.cntr;
 
-        if(!tab.hasClass('bt_closable')) {
+        if (!tab.hasClass('bt_closable')) {
             console.warn('This tab is not closable');
             console.trace('close');
             return;
         }
 
-        if(this._checkEventRegistry('close', tab) === false) return;
+        if (this._checkEventRegistry('close', tab) === false) return;
 
         var $elems = $().add(tab).add(cntr);
         var prevTab = tab.prev();
 
-        if(this.options.closable) {
+        if (this.options.closable) {
             var pairId = tab.data('pairid');
             var pairedTabLi = this.tabs.children('.notab').find(`.bt_listItem[data-pairid="${pairId}"]`);
             $elems = $elems.add(pairedTabLi);
@@ -440,20 +440,20 @@ class BindTabs {
         this.addEventHook('close', tab, func);
     }
     _prepTabForHook(tab:JQuery) {
-        if(tab.hasClass(CNTR_CLASS)) {
+        if (tab.hasClass(CNTR_CLASS)) {
             tab = this.pairedTo(tab);
-        } else if(!tab.hasClass(TAB_CLASS) && !tab.hasClass('notab')) {
+        } else if (!tab.hasClass(TAB_CLASS) && !tab.hasClass('notab')) {
             throw new ReferenceError('Event hook elements must be either a tab or container; none were passed');
         }
         return tab;
     }
     _prepFnForHook(fn) {
-        if(!$.isFunction(fn) && fn !== false) {
+        if (!$.isFunction(fn) && fn !== false) {
             throw new TypeError('Event hook callbacks must either be a function or boolean false (to prevent action from occurring)');
         } else return fn;
     }
     _addEventRegistry(event:string, regObj:BtEventRegistryObject) {
-        if(this.eventRegistry[event] === undefined) {
+        if (this.eventRegistry[event] === undefined) {
             this.eventRegistry[event] = [];
         }
         this.eventRegistry[event].push(regObj);
@@ -463,7 +463,7 @@ class BindTabs {
         var evtReg = this.eventRegistry[event];
         var doEvent = true;
 
-        if(evtReg !== undefined) {
+        if (evtReg !== undefined) {
             evtReg.forEach(checkEachReg);
         }
 
@@ -471,8 +471,8 @@ class BindTabs {
 
         function checkEachReg(regObj) {
             var checkTab = plugin._checkElem(regObj.tab);
-            if(tab.attr('id') === checkTab.attr('id')) {
-                if(regObj.fn() === false) {
+            if (tab.attr('id') === checkTab.attr('id')) {
+                if (regObj.fn() === false) {
                     doEvent = false;
                 }
             }
@@ -494,12 +494,12 @@ class BindTabs {
         var dynOpts: DynTabGenOptions = {
             pairid: generateUniqInstanceId()
         };
-        if(is('object', opts)) {
+        if (is('object', opts)) {
             $.extend(dynOpts, opts);
-        } else if(is('string', opts)) {
+        } else if (is('string', opts)) {
             dynOpts.tabName = opts;
         }
-        if(is('string', custId)) {
+        if (is('string', custId)) {
             console.warn('%cBindTabs:', 'font-weight:bold', '2nd param of .dynamicTabGen() deprecated; please pass custId as init object property');
             dynOpts.custId = custId;
         }
@@ -514,7 +514,7 @@ class BindTabs {
             tabListItem: null,
             container: null
         };
-        if(!isEmpty(options.after)) {
+        if (!isEmpty(options.after)) {
             target = this._getAfterTarget(options.after);
         } else {
             target.tab = this.getTabs().last();
@@ -528,16 +528,16 @@ class BindTabs {
     _getAfterTarget(after) {
         var newAfter: string; // needs to eventually be pairid of afterTarget
 
-        if(is('string', after)) {
-            if(isNaN(+after)) {
+        if (is('string', after)) {
+            if (isNaN(+after)) {
                 newAfter = this._checkStrForAfter(after);
             } else {
-                if(this._isPairid(after)) {
+                if (this._isPairid(after)) {
                     newAfter = after;
                 }
             }
         }
-        if(is('number', after)) {
+        if (is('number', after)) {
             newAfter = '' + after;
         }
         if (is('object', after)) {
@@ -559,7 +559,7 @@ class BindTabs {
     _checkStrForAfter(after: string): string {
         var toReturn: string = '';
         
-        if(this._isPairid(after)) {
+        if (this._isPairid(after)) {
             toReturn = after;
         } 
         let matchedPairid: string = this._checkTabIds(after);
@@ -574,7 +574,7 @@ class BindTabs {
 
         // loop tabs looking for id matching after
         this.getTabs().each((index, tab) => {
-            if(after === tab.id && isEmpty(toReturn)) {
+            if (after === tab.id && isEmpty(toReturn)) {
                 toReturn = after;
             }
         });
