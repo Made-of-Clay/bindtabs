@@ -156,8 +156,9 @@ class BindTabs {
         });
     }
     _makeNewPairId() {
-        var newId = makeDateId();
-        while($.inArray(newId, this.pairIds) > -1) {
+        var newId: string = makeDateId();
+        // while($.inArray(newId, this.pairIds) > -1) {
+        while(this._isPairid(newId)) {
             newId = makeDateId();
         }
         this.pairIds.push(newId);
@@ -176,6 +177,10 @@ class BindTabs {
 
             tabList.find('.bt_tab').toggleClass('bt_tab bt_listItem');
         }
+    }
+
+    _isPairid(idToCheck: string): boolean {
+        return $.inArray(idToCheck, this.pairIds) > -1;
     }
 
     _initListeners() {
@@ -499,11 +504,82 @@ class BindTabs {
             dynOpts.custId = custId;
         }
         var elems = tabgen.newTab(dynOpts);
-        this.getTabs().last().after(elems.tab);
-        this.getTabListItems().last().after(elems.tabLi);
-        this.getContainers().last().after(elems.cntr);
+        this._addToDom(elems, dynOpts);
         this.show(elems.tab);
         return elems.cntr;
+    }
+    _addToDom(elems, options: DynTabGenOptions): void {
+        var target = {
+            tab: null,
+            tabListItem: null,
+            container: null
+        };
+        if(!isEmpty(options.after)) {
+            target = this._getAfterTarget(options.after);
+        } else {
+            target.tab = this.getTabs().last();
+            target.tabListItem = this.getTabListItems().last();
+            target.container = this.getContainers().last();
+        }
+        target.tab.after(elems.tab);
+        target.tabListItem.after(elems.tabLi);
+        target.container.after(elems.cntr);
+    }
+    _getAfterTarget(after) {
+        var newAfter: string; // needs to eventually be pairid of afterTarget
+
+        if(is('string', after)) {
+            if(isNaN(+after)) {
+                newAfter = this._checkStrForAfter(after);
+            } else {
+                if(this._isPairid(after)) {
+                    newAfter = after;
+                }
+            }
+        }
+        if(is('number', after)) {
+            newAfter = '' + after;
+        }
+        if (is('object', after)) {
+            let pairid = getPairidFromObject(after);
+            if (pairid !== undefined) {
+                newAfter = pairid;
+            }
+        }
+        if (isEmpty(newAfter)) {
+            console.error(pluginName, '>> "after" option used, but element not found; after arg = ', after);
+        }
+        var filterPattern = `[data-pairid="${newAfter}"]`;
+        return {
+            tab: this.getTabs().filter(filterPattern),
+            tabListItem: this.getTabListItems().filter(filterPattern),
+            container: this.getContainers().filter(filterPattern)
+        };
+    }
+    _checkStrForAfter(after: string): string {
+        var toReturn: string = '';
+        
+        if(this._isPairid(after)) {
+            toReturn = after;
+        } 
+        let matchedPairid: string = this._checkTabIds(after);
+        if (matchedPairid) {
+            toReturn = matchedPairid;
+        }
+
+        return toReturn;
+    }
+    _checkTabIds(after: string): string {
+        var toReturn: string = '';
+
+        // loop tabs looking for id matching after
+        this.getTabs().each((index, tab) => {
+            if(after === tab.id && isEmpty(toReturn)) {
+                toReturn = after;
+            }
+        });
+
+        return toReturn;
     }
 
     destroy() {
@@ -529,7 +605,7 @@ function addClassToEach(className, elems) {
         $(elem).addClass(className);
     });
 }
-function makeDateId() {
+function makeDateId(): string {
     return Date.now().toString().substr(-4);
 }
 
@@ -581,6 +657,16 @@ function injectText(needle:string, haystack:string, position:number) {
     var half1:string = haystack.substr(0, position);
     var half2:string = haystack.substring(position);
     return half1 + needle + half2;
+}
+function getPairidFromObject(after) {
+    let $after: JQuery;
+    if (after instanceof HTMLElement) {
+        $after = $(after);
+    }
+    if (after instanceof jQuery) {
+        $after = after;
+    }
+    return $after.data('pairid');
 }
 
 $.fn[pluginName] = function(options: Object, retElems: boolean = false) {

@@ -472,8 +472,44 @@ describe('bindTabs', function () {
                 expect(newTabName).to.equal(tabname);
                 expect(newTabCustId).to.equal(custId);
             });
-            it('should allow tab|cntr class customization');
-            it('should allow custom placement in the (DOM) order of tabs');
+            it('should allow tab|cntr class customization', function () {
+                var tabClass = 'test-tab';
+                var cntrClass = 'test-cntr';
+                bto.dynamicTabGen({
+                    tabName: 'Test Tab',
+                    tabClass: tabClass,
+                    cntrClass: cntrClass
+                });
+                var tabHasTestClass = bto.getTabs().filter('.bt_dynamic').hasClass(tabClass);
+                var cntrHasTestClass = bto.getContainers().filter('.bt_dynamic').hasClass(cntrClass);
+
+                expect(tabHasTestClass).to.be.true;
+                expect(cntrHasTestClass).to.be.true;
+            });
+            it('should allow custom placement in the (DOM) order of tabs', function () {
+                var firstTabClass = 'first';
+                var secondTabClass = 'second';
+                var firstTab = bto.getTabs().first().addClass(firstTabClass);
+                var numPairid = firstTab.data('pairid');
+                var afterTypes = {
+                    'Number': numPairid,
+                    'String': ('' + numPairid),
+                    'HTML'  : firstTab.get(0),
+                    'jQuery': firstTab,
+                };
+                $.each(afterTypes, function(key, selector) {
+                    bto.dynamicTabGen({
+                        tabName: key + ' After',
+                        tabClass: key,
+                        after: selector
+                    });
+                    var newSecondTab = bto.getTabs().filter('.'+key);
+                    var tabBefore = newSecondTab.prev();
+                    var tabBeforeIsFirstTab = tabBefore.hasClass(firstTabClass)
+
+                    expect(tabBeforeIsFirstTab).to.be.true;
+                });
+            });
             it('should allow asyncronous content loading into containers');
             it('should be able to flag new tab as disabled');
             // it('________');

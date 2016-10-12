@@ -13,7 +13,6 @@ var DynamicTabGen = (function () {
     function DynamicTabGen(options) {
         this._setNewConsts(options);
     }
-    ;
     DynamicTabGen.prototype._setNewConsts = function (conf) {
         TAB_CLASS = conf.tabClass;
         TABLI_CLASS = conf.tabLiClass;
@@ -36,8 +35,9 @@ var DynamicTabGen = (function () {
             class: TABNAME_WRAP_CLASS,
             html: options.tabName || DEFAULT_TABNAME
         });
+        var customTabClass = this._checkForCustTabClass(options);
         var newTabAtts = {
-            class: TAB_CLASS + " " + DYN_CLASS,
+            class: TAB_CLASS + " " + DYN_CLASS + " " + customTabClass,
             'data-pairid': options.pairid,
             'data-custid': options.custId,
             title: options.tabName
@@ -51,8 +51,9 @@ var DynamicTabGen = (function () {
         return newTabLi;
     };
     DynamicTabGen.prototype._buildNewCntr = function (options) {
+        var customCntrClass = this._checkForCustCntrClass(options);
         var newCntrAtts = {
-            class: CNTR_CLASS + " " + DYN_CLASS,
+            class: CNTR_CLASS + " " + DYN_CLASS + " " + customCntrClass,
             'data-pairid': options.pairid
         };
         var newCntr = $('<div>', newCntrAtts);
@@ -67,6 +68,12 @@ var DynamicTabGen = (function () {
             });
         }
         return options;
+    };
+    DynamicTabGen.prototype._checkForCustTabClass = function (options) {
+        return options.hasOwnProperty('tabClass') ? options.tabClass : '';
+    };
+    DynamicTabGen.prototype._checkForCustCntrClass = function (options) {
+        return options.hasOwnProperty('cntrClass') ? options.cntrClass : '';
     };
     return DynamicTabGen;
 }());
@@ -218,7 +225,8 @@ var BindTabs = (function () {
     };
     BindTabs.prototype._makeNewPairId = function () {
         var newId = makeDateId();
-        while ($.inArray(newId, this.pairIds) > -1) {
+        // while($.inArray(newId, this.pairIds) > -1) {
+        while (this._isPairid(newId)) {
             newId = makeDateId();
         }
         this.pairIds.push(newId);
@@ -236,6 +244,9 @@ var BindTabs = (function () {
             var tabList = $('<ul>', { class: 'bt_list', html: tabsWithoutList }).appendTo(tabListBtn);
             tabList.find('.bt_tab').toggleClass('bt_tab bt_listItem');
         }
+    };
+    BindTabs.prototype._isPairid = function (idToCheck) {
+        return $.inArray(idToCheck, this.pairIds) > -1;
     };
     BindTabs.prototype._initListeners = function () {
         var plugin = this;
@@ -532,11 +543,79 @@ var BindTabs = (function () {
             dynOpts.custId = custId;
         }
         var elems = tabgen.newTab(dynOpts);
-        this.getTabs().last().after(elems.tab);
-        this.getTabListItems().last().after(elems.tabLi);
-        this.getContainers().last().after(elems.cntr);
+        this._addToDom(elems, dynOpts);
         this.show(elems.tab);
         return elems.cntr;
+    };
+    BindTabs.prototype._addToDom = function (elems, options) {
+        var target = {
+            tab: null,
+            tabListItem: null,
+            container: null
+        };
+        if (!isEmpty(options.after)) {
+            target = this._getAfterTarget(options.after);
+        }
+        else {
+            target.tab = this.getTabs().last();
+            target.tabListItem = this.getTabListItems().last();
+            target.container = this.getContainers().last();
+        }
+        target.tab.after(elems.tab);
+        target.tabListItem.after(elems.tabLi);
+        target.container.after(elems.cntr);
+    };
+    BindTabs.prototype._getAfterTarget = function (after) {
+        var newAfter; // needs to eventually be pairid of afterTarget
+        if (is('string', after)) {
+            if (isNaN(+after)) {
+                newAfter = this._checkStrForAfter(after);
+            }
+            else {
+                if (this._isPairid(after)) {
+                    newAfter = after;
+                }
+            }
+        }
+        if (is('number', after)) {
+            newAfter = '' + after;
+        }
+        if (is('object', after)) {
+            var pairid = getPairidFromObject(after);
+            if (pairid !== undefined) {
+                newAfter = pairid;
+            }
+        }
+        if (isEmpty(newAfter)) {
+            console.error(pluginName, '>> "after" option used, but element not found; after arg = ', after);
+        }
+        var filterPattern = "[data-pairid=\"" + newAfter + "\"]";
+        return {
+            tab: this.getTabs().filter(filterPattern),
+            tabListItem: this.getTabListItems().filter(filterPattern),
+            container: this.getContainers().filter(filterPattern)
+        };
+    };
+    BindTabs.prototype._checkStrForAfter = function (after) {
+        var toReturn = '';
+        if (this._isPairid(after)) {
+            toReturn = after;
+        }
+        var matchedPairid = this._checkTabIds(after);
+        if (matchedPairid) {
+            toReturn = matchedPairid;
+        }
+        return toReturn;
+    };
+    BindTabs.prototype._checkTabIds = function (after) {
+        var toReturn = '';
+        // loop tabs looking for id matching after
+        this.getTabs().each(function (index, tab) {
+            if (after === tab.id && isEmpty(toReturn)) {
+                toReturn = after;
+            }
+        });
+        return toReturn;
     };
     BindTabs.prototype.destroy = function () {
         this._teardown();
@@ -609,6 +688,16 @@ function injectText(needle, haystack, position) {
     var half1 = haystack.substr(0, position);
     var half2 = haystack.substring(position);
     return half1 + needle + half2;
+}
+function getPairidFromObject(after) {
+    var $after;
+    if (after instanceof HTMLElement) {
+        $after = $(after);
+    }
+    if (after instanceof jQuery) {
+        $after = after;
+    }
+    return $after.data('pairid');
 }
 $.fn[pluginName] = function (options, retElems) {
     var _this = this;
