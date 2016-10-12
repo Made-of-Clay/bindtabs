@@ -10,8 +10,6 @@ var   CNTR_CLASS: string = '';
 var   TABNAME_WRAP_CLASS: string = '';
 
 export class DynamicTabGen {
-    ;
-
     constructor(options: DynTabGenInitOpts) {
         this._setNewConsts(options);
     }
@@ -39,8 +37,9 @@ export class DynamicTabGen {
             class: TABNAME_WRAP_CLASS,
             html: options.tabName || DEFAULT_TABNAME
         });
+        var customTabClass = this._checkForCustTabClass(options);
         var newTabAtts = {
-            class: `${TAB_CLASS} ${DYN_CLASS}`,
+            class: `${TAB_CLASS} ${DYN_CLASS} ${customTabClass}`,
             'data-pairid': options.pairid,
             'data-custid': options.custId,
             title: options.tabName
@@ -55,8 +54,9 @@ export class DynamicTabGen {
         return newTabLi;
     }
     _buildNewCntr(options: DynTabGenOptions) {
+        var customCntrClass = this._checkForCustCntrClass(options);
         var newCntrAtts = {
-            class: `${CNTR_CLASS} ${DYN_CLASS}`,
+            class: `${CNTR_CLASS} ${DYN_CLASS} ${customCntrClass}`,
             'data-pairid': options.pairid
         };
         var newCntr: JQuery = $('<div>', newCntrAtts);
@@ -71,6 +71,12 @@ export class DynamicTabGen {
             });
         }
         return options;
+    }
+    _checkForCustTabClass(options: DynTabGenOptions) {
+        return options.hasOwnProperty('tabClass') ? options.tabClass : '';
+    }
+    _checkForCustCntrClass(options: DynTabGenOptions) {
+        return options.hasOwnProperty('cntrClass') ? options.cntrClass : '';
     }
 }
 
