@@ -142,6 +142,21 @@ describe('bindTabs', function () {
             listToggleCount.should.equal(1); // should be one list toggle item
             expect(oneTabLiPerTab).to.be.true; // one tab li for each tab
         });
+        it('should disabled specified tabs and show text reflecting disabled status', function () {
+noRemove(bt);
+            var disabled = 'is-disabled';
+            bt.find('li:last-child').addClass(disabled);
+            bto = bt.bindTabs()[0];
+            var lastTab = bto.getTabs().last();
+            lastTab.click();
+            var lastTabSelected = lastTab.hasClass('is-showing');
+            var lastTabDisabled = lastTab.hasClass(disabled);
+            var lastTabSaysDisabled = lastTab.text().match(/disabled/i).length > 0
+
+            expect(lastTabSelected).to.be.false;
+            expect(lastTabDisabled).to.be.true;
+            expect(lastTabSaysDisabled).to.be.true;
+        });
     });
 
     describe('DOM events', function () {

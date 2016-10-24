@@ -29,6 +29,7 @@ const showClass = 'is-showing';
 const tabNameWrapClass = 'tabNameWrap';
 const closeIconClass = 'bt_closeTab';
 const closableClass = 'bt_closable';
+const DISABLED_CLASS = 'is-disabled';
 
 class BindTabs {
     iid: number = generateUniqInstanceId();
@@ -112,6 +113,7 @@ class BindTabs {
         this._addPairId();
         this._showStartingTab();
         this._checkForTablist();
+        this._checkDisabledTabs();
     }
     _addIid() {
         this.element.data('btIid', this.iid);
@@ -176,6 +178,21 @@ class BindTabs {
             var tabList = $('<ul>', { class:'bt_list', html:tabsWithoutList }).appendTo(tabListBtn);
 
             tabList.find('.bt_tab').toggleClass('bt_tab bt_listItem');
+        }
+    }
+
+    _checkDisabledTabs() {
+        // find disabled tabs
+        // append ": Disabled" text
+        var disabledTabs = this.getTabs().filter('.' + DISABLED_CLASS);
+
+        if (disabledTabs.length) {
+            disabledTabs.each((i, tab) => {
+                let text: string = getTabName(tab);
+                let newText: string = `${text}: Disabled`;
+                // ::: updateTabName
+                $(tab).children('.' + tabNameWrapClass).text(newText);
+            });
         }
     }
 
@@ -667,6 +684,14 @@ function getPairidFromObject(after) {
         $after = after;
     }
     return $after.data('pairid');
+}
+
+function getTabName(tab: Element|HTMLElement|JQuery): string {
+    var $tab: JQuery;
+    if (!isJQuery(tab)) {
+        $tab = $(tab);
+    }
+    return $tab.children('.' + tabNameWrapClass).text();
 }
 
 $.fn[pluginName] = function(options: Object, retElems: boolean = false) {
