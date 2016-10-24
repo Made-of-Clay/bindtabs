@@ -253,7 +253,8 @@ var BindTabs = (function () {
         var disabledTabs = this.getTabs().filter('.' + DISABLED_CLASS);
         if (disabledTabs.length) {
             disabledTabs.each(function (i, tab) {
-                var text = getTabName(tab);
+                var tabEl = tab;
+                var text = getTabName(tabEl);
                 var newText = text + ": Disabled";
                 // ::: updateTabName
                 $(tab).children('.' + tabNameWrapClass).text(newText);
@@ -382,6 +383,15 @@ var BindTabs = (function () {
             return null;
         }
         return this[group].children("[data-pairid=\"" + el.data('pairid') + "\"]");
+    };
+    BindTabs.prototype.updateTabName = function (newName, tab) {
+        tab = tab || this.getCurTab();
+        var $tab = $(tab);
+        var className = '.' + tabNameWrapClass;
+        $tab.attr('title', newName).children(className).html(newName);
+        var pairid = $tab.data('pairid');
+        var relListItem = this.getTabListItems().filter("[data-pairid=\"" + pairid + "\"]");
+        relListItem.children(className).html(newName);
     };
     BindTabs.prototype.getCurrent = function (toGet) {
         var toReturn = $();
@@ -556,6 +566,10 @@ var BindTabs = (function () {
         if (is('string', custId)) {
             console.warn('%cBindTabs:', 'font-weight:bold', '2nd param of .dynamicTabGen() deprecated; please pass custId as init object property');
             dynOpts.custId = custId;
+        }
+        if (dynOpts.disabled) {
+            var classes = dynOpts.tabClass;
+            dynOpts.tabClass = classes + " is-disabled";
         }
         var elems = tabgen.newTab(dynOpts);
         this._addToDom(elems, dynOpts);

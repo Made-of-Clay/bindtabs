@@ -188,7 +188,8 @@ class BindTabs {
 
         if (disabledTabs.length) {
             disabledTabs.each((i, tab) => {
-                let text: string = getTabName(tab);
+                let tabEl = <HTMLElement> tab;
+                let text: string = getTabName(tabEl);
                 let newText: string = `${text}: Disabled`;
                 // ::: updateTabName
                 $(tab).children('.' + tabNameWrapClass).text(newText);
@@ -331,6 +332,19 @@ class BindTabs {
         }
 
         return this[group].children(`[data-pairid="${el.data('pairid')}"]`);
+    }
+
+    updateTabName(newName: string, tab: HTMLElement|JQuery) {
+        tab = tab || this.getCurTab();
+
+        let $tab: JQuery = $(tab);
+        let className = '.' + tabNameWrapClass;
+
+        $tab.attr('title', newName).children(className).html(newName);
+
+        let pairid = $tab.data('pairid');
+        let relListItem = this.getTabListItems().filter(`[data-pairid="${pairid}"]`);
+        relListItem.children(className).html(newName);
     }
 
     getCurrent(toGet?: string) {
@@ -520,6 +534,10 @@ class BindTabs {
             console.warn('%cBindTabs:', 'font-weight:bold', '2nd param of .dynamicTabGen() deprecated; please pass custId as init object property');
             dynOpts.custId = custId;
         }
+        if (dynOpts.disabled) {
+            let classes = dynOpts.tabClass;
+            dynOpts.tabClass = `${classes} is-disabled`;
+        }
         var elems = tabgen.newTab(dynOpts);
         this._addToDom(elems, dynOpts);
         this.show(elems.tab);
@@ -661,7 +679,7 @@ function isInString(needle:string|string[], haystack:string, useAnd?:boolean) {
     rxp     = new RegExp(pattern);
     return haystack.search(rxp) > -1;
 }
-function generateUniqInstanceId() {
+function generateUniqInstanceId(): number {
     var salt = '5137';
     var tmpId = makeDateId();
     var insertionPoint = getRandomArbitrary(0, tmpId.length);
@@ -686,7 +704,7 @@ function getPairidFromObject(after) {
     return $after.data('pairid');
 }
 
-function getTabName(tab: Element|HTMLElement|JQuery): string {
+function getTabName(tab: HTMLElement|JQuery): string {
     var $tab: JQuery;
     if (!isJQuery(tab)) {
         $tab = $(tab);

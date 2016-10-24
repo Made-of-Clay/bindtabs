@@ -143,7 +143,6 @@ describe('bindTabs', function () {
             expect(oneTabLiPerTab).to.be.true; // one tab li for each tab
         });
         it('should disabled specified tabs and show text reflecting disabled status', function () {
-noRemove(bt);
             var disabled = 'is-disabled';
             bt.find('li:last-child').addClass(disabled);
             bto = bt.bindTabs()[0];
@@ -525,9 +524,26 @@ noRemove(bt);
                     expect(tabBeforeIsFirstTab).to.be.true;
                 });
             });
+            it('should expose method to update tab name', function () {
+                var newTabName = 'Foobar Frilleez';
+                var firstTab = bto.getTabs().first();
+                bto.updateTabName(newTabName, firstTab);
+                var tabName = firstTab.children('.tabNameWrap').text();
+
+                tabName.should.equal(newTabName);
+            });
+            it('should be able to flag new tab as disabled', function () {
+noRemove(bt);
+                bto.dynamicTabGen({
+                    tabName: 'Nooperz',
+                    disabled: true
+                });
+                var newestTab = bto.getTabs().last();
+                var newestDisabled = newestTab.hasClass('is-disabled');
+
+                expect(newestDisabled).to.be.true;
+            });
             it('should allow asyncronous content loading into containers');
-            it('should be able to flag new tab as disabled');
-            // it('________');
         });
     });
 });
