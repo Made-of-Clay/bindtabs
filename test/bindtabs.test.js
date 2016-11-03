@@ -212,7 +212,7 @@ describe('bindTabs', function () {
             lastTabPairId.should.equal(firstTabPairId); // 'cause tab 2 was closed, so last tab is now tab 1
             tabCountAfter.should.equal(tablistCount);
         });
-        // it('');
+        it('should hide all but selected tab when width:tabCount ratio is met');
         // it('');
         // it('');
     });
