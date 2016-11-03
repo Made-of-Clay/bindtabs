@@ -29,6 +29,7 @@ const showClass = 'is-showing';
 const tabNameWrapClass = 'tabNameWrap';
 const closeIconClass = 'bt_closeTab';
 const closableClass = 'bt_closable';
+const DISABLED_CLASS = 'is-disabled';
 
 class BindTabs {
     iid: number = generateUniqInstanceId();
@@ -112,6 +113,7 @@ class BindTabs {
         this._addPairId();
         this._showStartingTab();
         this._checkForTablist();
+        this._checkDisabledTabs();
     }
     _addIid() {
         this.element.data('btIid', this.iid);
@@ -176,6 +178,22 @@ class BindTabs {
             var tabList = $('<ul>', { class:'bt_list', html:tabsWithoutList }).appendTo(tabListBtn);
 
             tabList.find('.bt_tab').toggleClass('bt_tab bt_listItem');
+        }
+    }
+
+    _checkDisabledTabs() {
+        // find disabled tabs
+        // append ": Disabled" text
+        var disabledTabs = this.getTabs().filter('.' + DISABLED_CLASS);
+
+        if (disabledTabs.length) {
+            disabledTabs.each((i, tab) => {
+                let tabEl = <HTMLElement> tab;
+                let text: string = getTabName(tabEl);
+                let newText: string = `${text}: Disabled`;
+                // ::: updateTabName
+                $(tab).children('.' + tabNameWrapClass).text(newText);
+            });
         }
     }
 
@@ -314,6 +332,19 @@ class BindTabs {
         }
 
         return this[group].children(`[data-pairid="${el.data('pairid')}"]`);
+    }
+
+    updateTabName(newName: string, tab: HTMLElement|JQuery) {
+        tab = tab || this.getCurTab();
+
+        let $tab: JQuery = $(tab);
+        let className = '.' + tabNameWrapClass;
+
+        $tab.attr('title', newName).children(className).html(newName);
+
+        let pairid = $tab.data('pairid');
+        let relListItem = this.getTabListItems().filter(`[data-pairid="${pairid}"]`);
+        relListItem.children(className).html(newName);
     }
 
     getCurrent(toGet?: string) {
@@ -503,6 +534,10 @@ class BindTabs {
             console.warn('%cBindTabs:', 'font-weight:bold', '2nd param of .dynamicTabGen() deprecated; please pass custId as init object property');
             dynOpts.custId = custId;
         }
+        if (dynOpts.disabled) {
+            let classes = dynOpts.tabClass;
+            dynOpts.tabClass = `${classes} is-disabled`;
+        }
         var elems = tabgen.newTab(dynOpts);
         this._addToDom(elems, dynOpts);
         this.show(elems.tab);
@@ -644,7 +679,7 @@ function isInString(needle:string|string[], haystack:string, useAnd?:boolean) {
     rxp     = new RegExp(pattern);
     return haystack.search(rxp) > -1;
 }
-function generateUniqInstanceId() {
+function generateUniqInstanceId(): number {
     var salt = '5137';
     var tmpId = makeDateId();
     var insertionPoint = getRandomArbitrary(0, tmpId.length);
@@ -667,6 +702,14 @@ function getPairidFromObject(after) {
         $after = after;
     }
     return $after.data('pairid');
+}
+
+function getTabName(tab: HTMLElement|JQuery): string {
+    var $tab: JQuery;
+    if (!isJQuery(tab)) {
+        $tab = $(tab);
+    }
+    return $tab.children('.' + tabNameWrapClass).text();
 }
 
 $.fn[pluginName] = function(options: Object, retElems: boolean = false) {

@@ -142,6 +142,20 @@ describe('bindTabs', function () {
             listToggleCount.should.equal(1); // should be one list toggle item
             expect(oneTabLiPerTab).to.be.true; // one tab li for each tab
         });
+        it('should disabled specified tabs and show text reflecting disabled status', function () {
+            var disabled = 'is-disabled';
+            bt.find('li:last-child').addClass(disabled);
+            bto = bt.bindTabs()[0];
+            var lastTab = bto.getTabs().last();
+            lastTab.click();
+            var lastTabSelected = lastTab.hasClass('is-showing');
+            var lastTabDisabled = lastTab.hasClass(disabled);
+            var lastTabSaysDisabled = lastTab.text().match(/disabled/i).length > 0
+
+            expect(lastTabSelected).to.be.false;
+            expect(lastTabDisabled).to.be.true;
+            expect(lastTabSaysDisabled).to.be.true;
+        });
     });
 
     describe('DOM events', function () {
@@ -510,9 +524,26 @@ describe('bindTabs', function () {
                     expect(tabBeforeIsFirstTab).to.be.true;
                 });
             });
+            it('should expose method to update tab name', function () {
+                var newTabName = 'Foobar Frilleez';
+                var firstTab = bto.getTabs().first();
+                bto.updateTabName(newTabName, firstTab);
+                var tabName = firstTab.children('.tabNameWrap').text();
+
+                tabName.should.equal(newTabName);
+            });
+            it('should be able to flag new tab as disabled', function () {
+noRemove(bt);
+                bto.dynamicTabGen({
+                    tabName: 'Nooperz',
+                    disabled: true
+                });
+                var newestTab = bto.getTabs().last();
+                var newestDisabled = newestTab.hasClass('is-disabled');
+
+                expect(newestDisabled).to.be.true;
+            });
             it('should allow asyncronous content loading into containers');
-            it('should be able to flag new tab as disabled');
-            // it('________');
         });
     });
 });

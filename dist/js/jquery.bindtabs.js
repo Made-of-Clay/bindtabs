@@ -115,6 +115,7 @@ var showClass = 'is-showing';
 var tabNameWrapClass = 'tabNameWrap';
 var closeIconClass = 'bt_closeTab';
 var closableClass = 'bt_closable';
+var DISABLED_CLASS = 'is-disabled';
 var BindTabs = (function () {
     function BindTabs(element, options) {
         this.iid = generateUniqInstanceId();
@@ -182,6 +183,7 @@ var BindTabs = (function () {
         this._addPairId();
         this._showStartingTab();
         this._checkForTablist();
+        this._checkDisabledTabs();
     };
     BindTabs.prototype._addIid = function () {
         this.element.data('btIid', this.iid);
@@ -243,6 +245,20 @@ var BindTabs = (function () {
             var tabListToggle = $('<span>', { class: 'bt_toggle' }).appendTo(tabListBtn);
             var tabList = $('<ul>', { class: 'bt_list', html: tabsWithoutList }).appendTo(tabListBtn);
             tabList.find('.bt_tab').toggleClass('bt_tab bt_listItem');
+        }
+    };
+    BindTabs.prototype._checkDisabledTabs = function () {
+        // find disabled tabs
+        // append ": Disabled" text
+        var disabledTabs = this.getTabs().filter('.' + DISABLED_CLASS);
+        if (disabledTabs.length) {
+            disabledTabs.each(function (i, tab) {
+                var tabEl = tab;
+                var text = getTabName(tabEl);
+                var newText = text + ": Disabled";
+                // ::: updateTabName
+                $(tab).children('.' + tabNameWrapClass).text(newText);
+            });
         }
     };
     BindTabs.prototype._isPairid = function (idToCheck) {
@@ -367,6 +383,15 @@ var BindTabs = (function () {
             return null;
         }
         return this[group].children("[data-pairid=\"" + el.data('pairid') + "\"]");
+    };
+    BindTabs.prototype.updateTabName = function (newName, tab) {
+        tab = tab || this.getCurTab();
+        var $tab = $(tab);
+        var className = '.' + tabNameWrapClass;
+        $tab.attr('title', newName).children(className).html(newName);
+        var pairid = $tab.data('pairid');
+        var relListItem = this.getTabListItems().filter("[data-pairid=\"" + pairid + "\"]");
+        relListItem.children(className).html(newName);
     };
     BindTabs.prototype.getCurrent = function (toGet) {
         var toReturn = $();
@@ -542,6 +567,10 @@ var BindTabs = (function () {
             console.warn('%cBindTabs:', 'font-weight:bold', '2nd param of .dynamicTabGen() deprecated; please pass custId as init object property');
             dynOpts.custId = custId;
         }
+        if (dynOpts.disabled) {
+            var classes = dynOpts.tabClass;
+            dynOpts.tabClass = classes + " is-disabled";
+        }
         var elems = tabgen.newTab(dynOpts);
         this._addToDom(elems, dynOpts);
         this.show(elems.tab);
@@ -698,6 +727,13 @@ function getPairidFromObject(after) {
         $after = after;
     }
     return $after.data('pairid');
+}
+function getTabName(tab) {
+    var $tab;
+    if (!isJQuery(tab)) {
+        $tab = $(tab);
+    }
+    return $tab.children('.' + tabNameWrapClass).text();
 }
 $.fn[pluginName] = function (options, retElems) {
     var _this = this;
